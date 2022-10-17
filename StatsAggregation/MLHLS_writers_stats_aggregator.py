@@ -5,6 +5,7 @@ import string
 import os
 import itertools as it
 import unicodedata
+import argparse
 import sys
 
 punct_deleter = dict.fromkeys(i for i in range(sys.maxunicode)
@@ -40,4 +41,9 @@ def word_avg_length(writer, writers_dir):
 
     return total_length / words_cnt
 
-print(count_stats())
+
+if __name__ == "__main__":
+    argparser = argparse.ArgumentParser()
+    argparser.add_argument("--data_dir", help="root folder of all books")
+    args = argparser.parse_args()
+    print(count_stats(writers_dir=args.data_dir))
