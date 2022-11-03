@@ -1,8 +1,11 @@
+import hashlib
 import itertools as it
 import os
 from functools import partial
+from configparser import ConfigParser
 
 import ebooklib
+import numpy as np
 from bs4 import BeautifulSoup
 from ebooklib import epub
 
@@ -10,7 +13,7 @@ from ebooklib import epub
 def chapter_to_str(chapter):
     soup = BeautifulSoup(chapter.get_body_content(), 'html.parser')
     text = [para.get_text() for para in soup.find_all('p', class_="p1")]
-    return '\n\n'.join(text)
+    return text
 
 
 def get_books_as_text_iterator(writer, writers_dir, cutoff=-2):

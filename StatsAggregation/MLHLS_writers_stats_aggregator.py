@@ -23,7 +23,8 @@ def count_stats(writers_dir="C:\\Users\\annag\\Documents\\Писатели дл�
 def word_avg_length(writer, writers_dir):
     words_cnt = 0
     total_length = 0
-    for text in get_books_as_text_iterator(writer, writers_dir):
+    for chapter in get_books_as_text_iterator(writer, writers_dir):
+        text = '\n\n'.join(chapter)
         words_cnt += len(text.translate(punct_deleter).split())
         total_length += len(text.translate(punct_deleter).translate(space_deleter))
 
