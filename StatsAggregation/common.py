@@ -8,11 +8,12 @@ import ebooklib
 import numpy as np
 from bs4 import BeautifulSoup
 from ebooklib import epub
+import nltk
 
 
-def chapter_to_str(chapter):
+def get_paragraphs(chapter):
     soup = BeautifulSoup(chapter.get_body_content(), 'html.parser')
-    text = [para.get_text() for para in soup.find_all('p', class_="p1")]
+    text = [para.get_text() for para in soup.find_all('p')]
     return text
 
 
@@ -21,7 +22,7 @@ def get_books_as_text_iterator(writer, writers_dir, cutoff=-2):
     full_book_path = partial(os.path.join, writers_dir, writer)
     books = map(lambda book_name: epub.read_epub(full_book_path(book_name)), book_list)
     chapters = [book.get_items_of_type(ebooklib.ITEM_DOCUMENT) for book in books][slice(None, cutoff)]
-    return map(chapter_to_str, it.chain.from_iterable(chapters))
+    return map(get_paragraphs, it.chain.from_iterable(chapters))
 
 
 def get_dir_hash(directory):
@@ -56,3 +57,16 @@ def hash_results(func, data_dir, writer, *args, out_path=None, **kwargs):
     writers_hashfile[writer] = {"hash": hash_computed, "path": fname_to_save}
     with open(os.path.join(out_path, hash_file), "w") as f:
         writers_hashfile.write(f)
+
+def get_feature_sample(func):
+    def wrapper(writer, writers_dir, step=100):
+        chapters = get_books_as_text_iterator(writer, writers_dir)
+        chapters_to_sentences = map(lambda chp: nltk.sent_tokenize(' '.join(chp), language='russian'), chapters)
+        sentences = list(it.chain.from_iterable(chapters_to_sentences))
+
+        sample = []
+        for i in range(0, len(sentences), step):
+            sample.append(func(sentences[i: i + step]))
+        return sample
+
+    return wrapper
