@@ -1,14 +1,21 @@
 import hashlib
 import itertools as it
 import os
-from functools import partial
+from enum import Enum
 from configparser import ConfigParser
+from functools import partial, lru_cache
 
 import ebooklib
+import nltk
 import numpy as np
 from bs4 import BeautifulSoup
 from ebooklib import epub
-import nltk
+
+from switchboard import SwitchBoard
+
+
+class SOURCESNAMES(Enum):
+    sentences = "sentences"
 
 
 def get_paragraphs(chapter):
@@ -58,6 +65,7 @@ def hash_results(func, data_dir, writer, *args, out_path=None, **kwargs):
     with open(os.path.join(out_path, hash_file), "w") as f:
         writers_hashfile.write(f)
 
+
 def get_feature_sample(func):
     def wrapper(writer, writers_dir, step=100):
         chapters = get_books_as_text_iterator(writer, writers_dir)
@@ -68,5 +76,16 @@ def get_feature_sample(func):
         for i in range(0, len(sentences), step):
             sample.append(func(sentences[i: i + step]))
         return sample
-
     return wrapper
+
+
+@SwitchBoard.register_source(SOURCESNAMES.sentences)
+@lru_cache(maxsize=1)
+def sentences_per_chpt(writer, writers_dir, sample_step=100, **__):
+    chapters = get_books_as_text_iterator(writer, writers_dir)
+    chapters_to_sentences = map(lambda chp: nltk.sent_tokenize(' '.join(chp), language='russian'), chapters)
+    sentences = list(it.chain.from_iterable(chapters_to_sentences))
+    samples = []
+    for i in range(0, len(sentences), sample_step):
+        samples.append(sentences[i:i + sample_step])
+    return samples
