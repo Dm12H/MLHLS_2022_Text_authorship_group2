@@ -2,6 +2,7 @@ import hashlib
 import itertools as it
 import os
 from enum import Enum
+from abc import abstractmethod
 from configparser import ConfigParser
 from functools import partial, lru_cache
 
@@ -11,11 +12,12 @@ import numpy as np
 from bs4 import BeautifulSoup
 from ebooklib import epub
 
-from switchboard import SwitchBoard
-
+from visualizers import draw_distribution, draw_ridge3d
 
 class SOURCESNAMES(Enum):
     sentences = "sentences"
+
+
 
 
 def get_paragraphs(chapter):
@@ -79,7 +81,6 @@ def get_feature_sample(func):
     return wrapper
 
 
-@SwitchBoard.register_source(SOURCESNAMES.sentences)
 @lru_cache(maxsize=1)
 def sentences_per_chpt(writer, writers_dir, sample_step=100, **__):
     chapters = get_books_as_text_iterator(writer, writers_dir)
@@ -89,3 +90,51 @@ def sentences_per_chpt(writer, writers_dir, sample_step=100, **__):
     for i in range(0, len(sentences), sample_step):
         samples.append(sentences[i:i + sample_step])
     return samples
+
+
+class Feature:
+    @property
+    @abstractmethod
+    def name(self):
+        raise NotImplementedError
+
+    @abstractmethod
+    def __init__(self):
+        self.data_source = None
+        self.visualizer_single = None
+        self.visualizer_all = None
+
+    @abstractmethod
+    def _metric(self, data, **kwargs):
+        raise NotImplementedError
+
+    @staticmethod
+    @abstractmethod
+    def pack(data):
+        raise NotImplementedError
+
+    def __call__(self, data, **kwargs):
+        return list(self._metric(d, **kwargs) for d in data)
+
+    def visualize(self, data, **kwargs):
+        return self.visualizer_single(data, **kwargs)
+
+
+class ScalarFeature(Feature):
+    def __init__(self):
+        self.data_source = sentences_per_chpt
+        self.visualizer_single = draw_distribution
+        self.visualizer_all = draw_ridge3d
+
+    @staticmethod
+    def pack(data):
+        return np.mean(data)
+
+
+class FeatureList:
+    features = []
+
+    @classmethod
+    def register_feature(cls, feature):
+        cls.features.append(feature)
+        return feature
