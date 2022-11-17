@@ -19,17 +19,15 @@ def count_stats(writers_dir="C:\\Users\\annag\\Documents\\Писатели дл�
     extra_params = {"sample_step": 100}
     for writer in os.listdir(writers_dir):
         stats[writer] = dict()
-        for feature_cls in FeatureList.features:
-            feature_processor = feature_cls()
-            data_source = feature_processor.data_source
+        for feature in FeatureList.features:
+            data_source = feature.data_source
             data = data_source(writer, writers_dir, **extra_params)
-            feature = feature_processor(data)
-            stats[writer][feature_processor.name] = feature
+            processed_data = feature.process(data)
+            stats[writer][feature.name] = processed_data
     if save_pics:
         if out_dir is None:
             raise ValueError("need out_dir to save pictures")
-        for feature_cls in FeatureList.features:
-            feature = feature_cls()
+        for feature in FeatureList.features:
             labels = [writer for writer in stats.keys()]
             rows = [stats[writer][feature.name] for writer in labels]
             fig, ax = plt.subplots(figsize=(10, 10))

@@ -1,7 +1,6 @@
 import hashlib
 import itertools as it
 import os
-from enum import Enum
 from abc import abstractmethod
 from configparser import ConfigParser
 from functools import partial, lru_cache
@@ -13,11 +12,6 @@ from bs4 import BeautifulSoup
 from ebooklib import epub
 
 from visualizers import draw_distribution, draw_ridge3d
-
-class SOURCESNAMES(Enum):
-    sentences = "sentences"
-
-
 
 
 def get_paragraphs(chapter):
@@ -98,11 +92,20 @@ class Feature:
     def name(self):
         raise NotImplementedError
 
+    @property
     @abstractmethod
-    def __init__(self):
-        self.data_source = None
-        self.visualizer_single = None
-        self.visualizer_all = None
+    def data_source(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def visualizer_single(self):
+        raise NotImplementedError
+
+    @property
+    @abstractmethod
+    def visualizer_all(self):
+        raise NotImplementedError
 
     @abstractmethod
     def _metric(self, data, **kwargs):
@@ -113,18 +116,19 @@ class Feature:
     def pack(data):
         raise NotImplementedError
 
-    def __call__(self, data, **kwargs):
-        return list(self._metric(d, **kwargs) for d in data)
+    @classmethod
+    def process(cls, data, **kwargs):
+        return list(cls._metric(d, **kwargs) for d in data)
 
     def visualize(self, data, **kwargs):
         return self.visualizer_single(data, **kwargs)
 
 
 class ScalarFeature(Feature):
-    def __init__(self):
-        self.data_source = sentences_per_chpt
-        self.visualizer_single = draw_distribution
-        self.visualizer_all = draw_ridge3d
+
+    data_source = sentences_per_chpt
+    visualizer_single = draw_distribution
+    visualizer_all = draw_ridge3d
 
     @staticmethod
     def pack(data):
@@ -132,6 +136,7 @@ class ScalarFeature(Feature):
 
 
 class FeatureList:
+
     features = []
 
     @classmethod
