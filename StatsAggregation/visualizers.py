@@ -11,42 +11,53 @@ def draw_distribution(ax, data, color=None):
     sns.kdeplot(data, ax=ax, color=color)
 
 
-def draw_ridge3d(ax, data, n_rows=10, labels=None, **_):
+def draw_3d(ax, data, n_rows=10, labels=None, mode="ridge", overlap=True, **_):
     # TODO Bregman divergence kmeans for representative clusters
     n_rows = min(n_rows, len(data)) if n_rows is not None else len(data)
     # пока просто n штук, чтобы было видно
     data = data[:n_rows]
-    mn = np.min([np.min(line) for line in data])
-    mx = np.max([np.max(line) for line in data])
 
     subspec = ax.get_subplotspec()
-    gs = subspec.subgridspec(n_rows, 1, hspace=-.5)
+    hspace = -.5 if overlap else 0
+    gs = subspec.subgridspec(n_rows, 1, hspace=hspace)
     pal = sns.cubehelix_palette(n_rows, rot=-.25, light=.7)
     axs = gs.subplots()
+    if mode == "ridge":
+        mn = np.min([np.min(line) for line in data])
+        mx = np.max([np.max(line) for line in data])
+        ax.set_xlim(mn, mx)
     # ensuring axs is iterable
     try:
         iter(axs)
     except TypeError:
         axs = (axs,)
-    ax.set_xlim(mn, mx)
     for i, sub_ax in enumerate(axs):
-        sns.kdeplot(data[i], ax=sub_ax, bw_adjust=.5, clip=(mn,mx), color=pal[i], fill=True, alpha=1, linewidth=1.5)
-        sns.kdeplot(data[i], ax=sub_ax, bw_adjust=.5, clip=(mn, mx), color="w")
+        if mode == "ridge":
+            sns.kdeplot(data[i], ax=sub_ax, bw_adjust=.5, clip=(mn, mx), color=pal[i], fill=True, alpha=1, linewidth=1.5)
+            sns.kdeplot(data[i], ax=sub_ax, bw_adjust=.5, clip=(mn, mx), color="w")
+            sub_ax.set_xlim(mn, mx)
+            sub_ax.set_yticks([])
+        elif mode == "hist":
+            x = np.arange(len(data[i]))
+            sns.barplot(x=x, y=data[i], ax=sub_ax, facecolor=pal[i], edgecolor=pal[i],  errorbar=None)
+            ax.set_xticks([])
+        else:
+            raise ValueError("invalid mode")
         # remove x and y ticks
-        sub_ax.set_yticks([])
         sub_ax.set_xticks([])
-        sub_ax.set_xlim(mn, mx)
         sub_ax.set_ylabel('')
         rect = sub_ax.patch
         rect.set_alpha(0)
         spines = ["top", "right", "left", "bottom"]
         for s in spines:
             sub_ax.spines[s].set_visible(False)
+    ax.set_yticks([])
     if labels:
         if len(labels) != n_rows:
             raise ValueError("labels should match number of rows for visualization")
         for label, sub_ax in zip(labels, axs):
-            sub_ax.text(mn, 0, label, fontsize=14, ha="right")
+            left, right = sub_ax.get_xlim()
+            sub_ax.text(right, 0, label, fontsize=14, ha="left")
 
 
 if __name__ == "__main__":

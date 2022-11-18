@@ -164,7 +164,7 @@ class ScalarFeature(Feature):
 
 class VectorFeature(Feature):
 
-    data_source = sentences_per_chpt
+    data_source = sentence_batches
     visualizer_single = draw_distribution
 
     @classmethod
