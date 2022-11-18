@@ -4,19 +4,24 @@ import unicodedata
 import sys
 
 import matplotlib.pyplot as plt
-import nltk
 
 from common import ScalarFeature, FeatureList
+from common import paragraphs_limmited_by_symbols, token_batches, word_batches
 
 punct_deleter = dict.fromkeys(i for i in range(sys.maxunicode)
                               if unicodedata.category(chr(i)).startswith('P'))
 space_deleter = dict.fromkeys(i for i in range(sys.maxunicode)
                               if unicodedata.category(chr(i)).startswith('Z'))
-
+long_dash = chr(8212)
 
 def count_stats(writers_dir="C:\\Users\\annag\\Documents\\Писатели для MLDS", save_pics=False, out_dir=None):
     stats = dict()
-    extra_params = {"sample_step": 100}
+    extra_params = {
+        "sentences_in_batch": 100, 
+        "symbol_lim": 50000, 
+        "tokens_in_batch": 2000, 
+        "words_in_batch": 2000
+        }
     for writer in os.listdir(writers_dir):
         stats[writer] = dict()
         for feature in FeatureList.features:
@@ -43,16 +48,12 @@ def count_stats(writers_dir="C:\\Users\\annag\\Documents\\Писатели дл�
 @FeatureList.register_feature
 class WordAvgLength(ScalarFeature):
     name = "word_avg_length"
+    data_source = word_batches
 
     @staticmethod
-    def _metric(sentences, **_):
-        words_cnt = 0
-        total_length = 0
-        for sentence in sentences:
-            words = [word for word in nltk.word_tokenize(sentence, language='russian') if word.isalpha()]
-            words_cnt += len(words)
-            total_length += len(' '.join(words))
-        return total_length / words_cnt
+    def _metric(words, **_):
+        total_len = sum(len(word) for word in words)
+        return total_len / len(words)
 
 
 @FeatureList.register_feature
@@ -63,7 +64,7 @@ class WordsPerSentence(ScalarFeature):
     def _metric(sentences, **_):
         words_cnt = 0
         for sentence in sentences:
-            words = [word for word in nltk.word_tokenize(sentence, language='russian') if word.isalpha()]
+            words = sentence.translate(punct_deleter).strip().split()
             words_cnt += len(words)
         return words_cnt / len(sentences)
 
@@ -74,10 +75,7 @@ class ExclamationDensity(ScalarFeature):
 
     @staticmethod
     def _metric(sentences, **_):
-        exclamations_cnt = 0
-        for sentence in sentences:
-            if '!' in sentence:
-                exclamations_cnt += 1
+        exclamations_cnt = len([s for s in sentences if '!' in s])
         return exclamations_cnt / len(sentences)
 
 
@@ -87,11 +85,34 @@ class QuestionDensity(ScalarFeature):
 
     @staticmethod
     def _metric(sentences, **_):
-        questions_cnt = 0
-        for sentence in sentences:
-            if '?' in sentence:
-                questions_cnt += 1
+        questions_cnt = len([s for s in sentences if '?' in s])
         return questions_cnt / len(sentences)
+
+
+@FeatureList.register_feature
+class DialogueDensity(ScalarFeature):
+    name = "dialogue_density"
+    data_source = paragraphs_limmited_by_symbols
+
+    @staticmethod
+    def _metric(paras, **_):
+        total_len = 0
+        dialogue_len = 0
+        for para in paras:
+            total_len += len(para)
+            if para and para[0] == long_dash:
+                dialogue_len += len(para)
+        return dialogue_len / total_len
+
+
+@FeatureList.register_feature
+class CommaDensity(ScalarFeature):
+    name = "comma_density"
+    data_source = token_batches
+
+    @staticmethod
+    def _metric(tokens, **_):
+        return tokens.count(',') / len(tokens)
 
 
 if __name__ == "__main__":
