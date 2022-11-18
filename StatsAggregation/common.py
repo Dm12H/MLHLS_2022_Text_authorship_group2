@@ -11,7 +11,7 @@ import numpy as np
 from bs4 import BeautifulSoup
 from ebooklib import epub
 
-from visualizers import draw_distribution, draw_ridge3d
+from visualizers import draw_distribution, draw_3d
 
 
 def get_paragraphs(chapter):
@@ -128,11 +128,29 @@ class ScalarFeature(Feature):
 
     data_source = sentences_per_chpt
     visualizer_single = draw_distribution
-    visualizer_all = draw_ridge3d
+    visualizer_all = draw_3d
 
     @staticmethod
     def pack(data):
         return np.mean(data)
+
+
+class VectorFeature(Feature):
+
+    data_source = sentences_per_chpt
+    visualizer_single = draw_distribution
+
+    @classmethod
+    def visualizer_all(cls, ax, data, n_rows=10, labels=None, **kwargs):
+        kwargs = kwargs
+        data_packed = np.array([cls.pack(w_data) for w_data in data])
+        data_mask = np.any(data_packed, axis=0)
+        data_clean = data_packed[:, data_mask]
+        draw_3d(ax, data_clean, n_rows=n_rows, labels=labels, mode="hist", overlap=False, **kwargs)
+
+    @staticmethod
+    def pack(data):
+        return np.mean(data, axis=0)
 
 
 class FeatureList:

@@ -6,7 +6,9 @@ import sys
 import matplotlib.pyplot as plt
 import nltk
 
+import ngrams
 from common import ScalarFeature, FeatureList
+
 
 punct_deleter = dict.fromkeys(i for i in range(sys.maxunicode)
                               if unicodedata.category(chr(i)).startswith('P'))
@@ -17,12 +19,13 @@ space_deleter = dict.fromkeys(i for i in range(sys.maxunicode)
 def count_stats(writers_dir="C:\\Users\\annag\\Documents\\Писатели для MLDS", save_pics=False, out_dir=None):
     stats = dict()
     extra_params = {"sample_step": 100}
+    feature_params = {"ngrams": 3}
     for writer in os.listdir(writers_dir):
         stats[writer] = dict()
         for feature in FeatureList.features:
             data_source = feature.data_source
             data = data_source(writer, writers_dir, **extra_params)
-            processed_data = feature.process(data)
+            processed_data = feature.process(data, **feature_params)
             stats[writer][feature.name] = processed_data
     if save_pics:
         if out_dir is None:
@@ -31,7 +34,7 @@ def count_stats(writers_dir="C:\\Users\\annag\\Documents\\Писатели дл�
             labels = [writer for writer in stats.keys()]
             rows = [stats[writer][feature.name] for writer in labels]
             fig, ax = plt.subplots(figsize=(10, 10))
-            feature.visualizer_all(ax=ax, data=rows, labels=labels)
+            feature.visualizer_all(ax=ax, data=rows, n_rows=len(rows), labels=labels)
             fig.savefig(os.path.join(out_dir, f"{feature.name}.jpeg"))
     for feature in FeatureList.features:
         for writer in stats.keys():
