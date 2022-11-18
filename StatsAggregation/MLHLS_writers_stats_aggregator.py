@@ -5,8 +5,10 @@ import sys
 
 import matplotlib.pyplot as plt
 
+import ngrams
 from common import ScalarFeature, FeatureList
 from common import paragraphs_limmited_by_symbols, token_batches, word_batches
+
 
 punct_deleter = dict.fromkeys(i for i in range(sys.maxunicode)
                               if unicodedata.category(chr(i)).startswith('P'))
@@ -22,12 +24,13 @@ def count_stats(writers_dir="C:\\Users\\annag\\Documents\\Писатели дл�
         "tokens_in_batch": 2000, 
         "words_in_batch": 2000
         }
+    feature_params = {"ngrams": 3}
     for writer in os.listdir(writers_dir):
         stats[writer] = dict()
         for feature in FeatureList.features:
             data_source = feature.data_source
             data = data_source(writer, writers_dir, **extra_params)
-            processed_data = feature.process(data)
+            processed_data = feature.process(data, **feature_params)
             stats[writer][feature.name] = processed_data
     if save_pics:
         if out_dir is None:
@@ -36,7 +39,7 @@ def count_stats(writers_dir="C:\\Users\\annag\\Documents\\Писатели дл�
             labels = [writer for writer in stats.keys()]
             rows = [stats[writer][feature.name] for writer in labels]
             fig, ax = plt.subplots(figsize=(10, 10))
-            feature.visualizer_all(ax=ax, data=rows, labels=labels)
+            feature.visualizer_all(ax=ax, data=rows, n_rows=len(rows), labels=labels)
             fig.savefig(os.path.join(out_dir, f"{feature.name}.jpeg"))
     for feature in FeatureList.features:
         for writer in stats.keys():
