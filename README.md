@@ -11,3 +11,4 @@
 
 ## [План работ](checkpoint_1/README.md)
 ## [Описание данных](checkpoint_2/README.md)
+## [Разведочный анализ](checkpoint_3/README.md)
