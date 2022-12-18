@@ -11,7 +11,7 @@ import numpy as np
 from bs4 import BeautifulSoup
 from ebooklib import epub
 
-from visualizers import draw_distribution, draw_3d
+from .visualizers import draw_distribution, draw_3d
 
 delete_inner = str.maketrans('', '', '\u0301\u0300\u0060\u02cb\u0027\u2019\u002d\u2010')
 

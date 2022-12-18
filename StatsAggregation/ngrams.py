@@ -5,7 +5,7 @@ import pymystem3
 import numpy as np
 from pymystem3.mystem import Mystem
 
-from common import FeatureList, VectorFeature
+from .common import FeatureList, VectorFeature
 
 
 @FeatureList.register_feature
