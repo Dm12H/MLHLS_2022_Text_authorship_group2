@@ -72,7 +72,7 @@ if __name__ == "__main__":
     x /= np.sum(x, axis=1)[..., np.newaxis]
 
     labels = [f"line_{i+1}" for i in range(10)]
-    draw_ridge3d(ax=ax, data=x, n_rows=10, labels=labels)
+    draw_3d(ax=ax, data=x, n_rows=10, labels=labels)
     ax.set_yticks([])
     ax.set_xticks([])
     plt.show()

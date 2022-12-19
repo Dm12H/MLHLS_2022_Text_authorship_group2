@@ -3,7 +3,7 @@ import os
 import unicodedata
 import sys
 
-from common import get_books_as_text_iterator
+from .common import get_books_as_text_iterator
 
 punct_deleter = dict.fromkeys(i for i in range(sys.maxunicode)
                               if unicodedata.category(chr(i)).startswith('P'))

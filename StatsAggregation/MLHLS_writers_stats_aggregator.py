@@ -5,9 +5,9 @@ import sys
 
 import matplotlib.pyplot as plt
 
-import ngrams
-from common import ScalarFeature, FeatureList
-from common import paragraphs_limmited_by_symbols, token_batches, word_batches
+from . import ngrams
+from .common import ScalarFeature, FeatureList
+from .common import paragraphs_limmited_by_symbols, token_batches, word_batches
 
 
 punct_deleter = dict.fromkeys(i for i in range(sys.maxunicode)
