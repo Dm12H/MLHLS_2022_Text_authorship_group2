@@ -30,7 +30,7 @@ def select_sample(dataframe, size=0.1):
     return dataframe.iloc[idx]
 
 
-def train_test_split(df, share=0.5, seed=10):
+def train_test_split(df, share=0.5, seed=10, cross_val=False):
     """
     разделяет данные на обучающую и тестовую выборки по книгам
     :param df: датафрейм для анализа
@@ -49,7 +49,7 @@ def train_test_split(df, share=0.5, seed=10):
     for label in shuffled_labels:
         df_slice = df[df.author == label][["book", "counts"]]
         unique_books = df_slice.drop_duplicates("book")
-        if len(unique_books) < 2:
+        if len(unique_books) < 2 and not cross_val:
             raise ValueError(f"too few books of author: {label}")
         permunation = rg.permutation(len(unique_books))
         shuffled_books = unique_books.iloc[permunation]
@@ -109,7 +109,7 @@ def get_author_vectorizer(frame, n_min=1, n=2, max_count=10000, column="lemmas")
     """
     grouped_text = frame.groupby("author", as_index=False)[column].agg({column: ' '.join})
     vectorizer = TfidfVectorizer(ngram_range=(n_min, n), max_features=max_count, norm='l2')
-    texts_vector = frame[column]
+    texts_vector = grouped_text[column]
     vectorizer.fit(texts_vector)
     return vectorizer
 
