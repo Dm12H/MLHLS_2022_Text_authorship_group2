@@ -2,4 +2,4 @@
 *.csv
 *.7z
 *.zip
-.ipnb_checkpoints/
+.ipynb_checkpoints/
