@@ -15,6 +15,7 @@ from .visualizers import draw_distribution, draw_3d
 
 delete_inner = str.maketrans('', '', '\u0301\u0300\u0060\u02cb\u0027\u2019\u002d\u2010')
 
+
 def get_paragraphs(chapter):
     soup = BeautifulSoup(chapter.get_body_content(), 'html.parser')
     text = [para.get_text() for para in soup.find_all('p')]
@@ -25,8 +26,20 @@ def get_books_as_text_iterator(writer, writers_dir, cutoff=-2):
     book_list = os.listdir(os.path.join(writers_dir, writer))
     full_book_path = partial(os.path.join, writers_dir, writer)
     books = map(lambda book_name: epub.read_epub(full_book_path(book_name)), book_list)
-    chapters = [book.get_items_of_type(ebooklib.ITEM_DOCUMENT) for book in books][slice(None, cutoff)]
-    return map(get_paragraphs, it.chain.from_iterable(chapters))
+    chapters = [list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))[slice(None, cutoff)] for book in books]
+    paragraphs = list(map(get_paragraphs, it.chain.from_iterable(chapters)))
+    return paragraphs
+
+
+def get_books(writer, writers_dir, cutoff=-2):
+    book_list = os.listdir(os.path.join(writers_dir, writer))
+    full_book_path = partial(os.path.join, writers_dir, writer)
+    books = {}
+    for book_name in book_list:
+        book = epub.read_epub(full_book_path(book_name))
+        chapters = list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))[slice(None, cutoff)]
+        books[book_name] = list(it.chain.from_iterable(map(get_paragraphs, chapters)))
+    return books
 
 
 def get_dir_hash(directory):
@@ -61,6 +74,23 @@ def hash_results(func, data_dir, writer, *args, out_path=None, **kwargs):
     writers_hashfile[writer] = {"hash": hash_computed, "path": fname_to_save}
     with open(os.path.join(out_path, hash_file), "w") as f:
         writers_hashfile.write(f)
+
+
+@lru_cache(maxsize=1)
+def get_data_for_df(writer, writers_dir, symbol_lim=3000):
+    books = get_books(writer, writers_dir)
+    data = []
+    for book, paras in books.items():
+        i = 0
+        while i < len(paras):
+            new_sample = []
+            symbol_cnt = 0
+            while symbol_cnt < symbol_lim and i < len(paras):
+                new_sample.append(paras[i])
+                symbol_cnt += len(paras[i])
+                i += 1
+            data.append((book, '\n'.join(new_sample)))
+    return data
 
 
 @lru_cache(maxsize=1)
