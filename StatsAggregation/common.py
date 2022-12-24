@@ -15,6 +15,7 @@ from .visualizers import draw_distribution, draw_3d
 
 delete_inner = str.maketrans('', '', '\u0301\u0300\u0060\u02cb\u0027\u2019\u002d\u2010')
 
+
 def get_paragraphs(chapter):
     soup = BeautifulSoup(chapter.get_body_content(), 'html.parser')
     text = [para.get_text() for para in soup.find_all('p')]
