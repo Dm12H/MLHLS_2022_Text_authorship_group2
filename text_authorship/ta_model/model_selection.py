@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
-from data_preparation import get_author_vectorizer
-from data_preparation import Featurebuilder
-from data_preparation import get_encoder
+from .data_preparation import get_author_vectorizer
+from .data_preparation import Featurebuilder
+from .data_preparation import get_encoder
 from sklearn.metrics import f1_score
 
 

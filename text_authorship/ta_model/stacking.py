@@ -4,8 +4,8 @@ import scipy as sp
 
 from sklearn.base import BaseEstimator, TransformerMixin, ClassifierMixin
 from sklearn.ensemble import StackingClassifier
-from data_preparation import get_author_vectorizer, get_document_vectorizer
-from model_selection import books_cross_val
+from .data_preparation import get_author_vectorizer, get_document_vectorizer
+from .model_selection import books_cross_val
 
 
 

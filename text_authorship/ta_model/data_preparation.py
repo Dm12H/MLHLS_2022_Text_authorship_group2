@@ -15,38 +15,47 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
 
 
-punkt = ''.join([chr(i) for i in range(sys.maxunicode) if unicodedata.category(chr(i)).startswith('P')])
+punkt = {chr(i) for i in range(sys.maxunicode) if unicodedata.category(chr(i)).startswith('P')}
+
+
+def _strip_str(s: str, chars):
+    i, j = 0, len(s)
+
+    while i < j and s[i] in chars:
+        i += 1
+
+    while i < j and s[j - 1] in chars:
+        j -= 1
+
+    return s[i:j]
 
 
 nltk.download('stopwords')
 
 
-def remove_punkt(text):
-    tokens = word_tokenize(text, language='russian')
-    tokens = [token.strip(punkt) for token in tokens]
-    return ' '.join([token for token in tokens if token])
+stop_tags = [
+    'Abbr',
+    'Name',
+    'Surn',
+    'Patr',
+    'Geox',
+    'Orgn',
+    'Trad'
+]
 
-
-def lemmatize_with_tags(text, sw=set()):
-    morph = MorphAnalyzer()
-    lemmas = []
-    tags = []
-    for w in text.split():
-        anls = morph.parse(w)[0]
-        if anls.normal_form not in sw:
-            lemmas.append(anls.normal_form)
-            tags.append(f'{len(w)}_{anls.tag.POS}')
-    return ' '.join(lemmas), ' '.join(tags)
+DELETED = 'deleted'
 
 
 class TATransformer(BaseEstimator, TransformerMixin):
 
-    def __init__(self, use_stopwords=True, save_to_csv=True):
+    def __init__(self, use_stopwords=True, save_path='transformed_df.csv', load_path=None):
         self.use_stopwords = use_stopwords
-        self.save_to_csv = save_to_csv
+        self.save_path = save_path
+        self.load_path = load_path
     
     def fit(self, X: pd.DataFrame, y=None):
-        self.sw_ = set(X['author'].str.lower().unique())
+        self.morph_ = MorphAnalyzer()
+        self.sw_ = set()
 
         if self.use_stopwords:
             self.sw_ = self.sw_ | set(stopwords.words('russian'))
@@ -54,24 +63,57 @@ class TATransformer(BaseEstimator, TransformerMixin):
         return self
     
     def transform(self, X: pd.DataFrame):
-        X = X.copy()
-        X['text'] = X['text'].str.lower()
+        if self.load_path and self.load_path.endswith('.csv'):
+            X = pd.read_csv(self.load_path)
+        else:
+            X = X.copy()
+            X['text'] = X['text'].str.lower()
 
-        X['text_no_punkt'] = X['text'].apply(remove_punkt)
+            new_data = pd.DataFrame(
+                list(map(self.parse_text, X['text'])),
+                columns=['text_no_punkt', 'lemmas', 'tags', 'tokens']
+            )
 
-        lemmas_and_tags = X['text_no_punkt'].apply(lemmatize_with_tags, sw=self.sw_)
-        df_lemmas_and_tags = pd.DataFrame(lemmas_and_tags, columns=['lemmas', 'tags'])
-
-        X = pd.concat([
-            X,
-            df_lemmas_and_tags
-        ], axis=1)
-
-        X['tokens'] = X['text'].apply(lambda t: ' '.join(word_tokenize(t, language='russian')))
-
-        X.to_csv('transformed_df.csv', index=False)
+            X = pd.concat([
+                X,
+                new_data
+            ], axis=1)
 
         return X
+    
+    def parse_text(self, text: str):
+        words = []
+        lemmas = []
+        tags = []
+        tokens = []
+
+        for token in word_tokenize(text, language='russian'):
+            stripped_token = _strip_str(token, punkt)
+
+            if not stripped_token:
+                tokens.append(token)
+                continue
+
+            anls = self.morph_.parse(stripped_token)[0]
+            
+            if anls.normal_form in self.sw_:
+                words.append(stripped_token)
+                tokens.append(token)
+                continue
+
+            if any([tag in anls.tag for tag in stop_tags]):
+                words.append(DELETED)
+                lemmas.append(DELETED)
+                tags.append(DELETED)
+                tokens.append(DELETED)
+                continue
+
+            words.append(stripped_token)
+            lemmas.append(anls.normal_form)
+            tags.append(f'{len(stripped_token)}_{anls.tag.POS}')
+            tokens.append(token)
+
+        return [' '.join(arr) for arr in [words, lemmas, tags, tokens]]
     
 
 def get_document_vectorizer(frame, n_min=1, n=2, max_count=10000, column="lemmas"):

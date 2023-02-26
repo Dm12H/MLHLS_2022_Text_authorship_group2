@@ -1,5 +1,5 @@
 from ..StatsAggregation.common import get_paragraphs
-from data_preparation import _count_features
+from .data_preparation import _count_features
 
 import os
 from functools import partial, lru_cache
@@ -17,7 +17,7 @@ def get_books(writer, writers_dir, cutoff=-2):
     for book_name in book_list:
         book = epub.read_epub(full_book_path(book_name))
         chapters = (book.get_item_with_id(chapter_id) for chapter_id, _ in book.spine)
-        text_chapters = [ch for ch in chapters if ch.get_type() == ebooklib.ITEM_DOCUMENT][slice(None, cutoff)]
+        text_chapters = [ch for ch in chapters if ch.get_type() == ebooklib.ITEM_DOCUMENT]
         books[book_name] = list(it.chain.from_iterable(map(get_paragraphs, text_chapters)))
     return books
 
