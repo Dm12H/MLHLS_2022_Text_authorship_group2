@@ -16,8 +16,9 @@ def get_books(writer, writers_dir, cutoff=-2):
     books = {}
     for book_name in book_list:
         book = epub.read_epub(full_book_path(book_name))
-        chapters = list(book.get_items_of_type(ebooklib.ITEM_DOCUMENT))[slice(None, cutoff)]
-        books[book_name] = list(it.chain.from_iterable(map(get_paragraphs, chapters)))
+        chapters = (book.get_item_with_id(chapter_id) for chapter_id, _ in book.spine)
+        text_chapters = [ch for ch in chapters if ch.get_type() == ebooklib.ITEM_DOCUMENT][slice(None, cutoff)]
+        books[book_name] = list(it.chain.from_iterable(map(get_paragraphs, text_chapters)))
     return books
 
 
