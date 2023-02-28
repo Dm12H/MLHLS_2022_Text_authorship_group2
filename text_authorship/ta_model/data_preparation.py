@@ -9,6 +9,8 @@ from pymorphy2 import MorphAnalyzer
 import numpy as np
 from itertools import chain
 import scipy as sp
+from enum import Flag, auto
+from collections import namedtuple
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -48,6 +50,8 @@ DELETED = 'deleted'
 
 class TATransformer(BaseEstimator, TransformerMixin):
 
+    _parsers = []
+
     def __init__(self, use_stopwords=True, save_path='transformed_df.csv', load_path=None):
         self.use_stopwords = use_stopwords
         self.save_path = save_path
@@ -56,6 +60,7 @@ class TATransformer(BaseEstimator, TransformerMixin):
     def fit(self, X: pd.DataFrame, y=None):
         self.morph_ = MorphAnalyzer()
         self.sw_ = set()
+        self.new_cols_ = ParseManager.get_col_names()
 
         if self.use_stopwords:
             self.sw_ = self.sw_ | set(stopwords.words('russian'))
@@ -71,7 +76,7 @@ class TATransformer(BaseEstimator, TransformerMixin):
 
             new_data = pd.DataFrame(
                 list(map(self.parse_text, X['text'])),
-                columns=['text_no_punkt', 'lemmas', 'tags', 'tokens']
+                columns=self.new_cols_
             )
 
             X = pd.concat([
@@ -79,42 +84,149 @@ class TATransformer(BaseEstimator, TransformerMixin):
                 new_data
             ], axis=1)
 
+            if self.save_path and self.save_path.endswith('.csv'):
+                X.to_csv(self.save_path, index=False)
+
         return X
     
     def parse_text(self, text: str):
-        words = []
-        lemmas = []
-        tags = []
-        tokens = []
+        return ParseManager.parse_text(self.morph_, self.sw_, text)
+    
+
+class TokenType(Flag):
+    NOFLAG = 0
+    PUNKT = auto()
+    STOPWORD = auto()
+    STOPTAG = auto()
+
+
+ParsingParams = namedtuple('ParsingParams', 'token stripped anls token_type')
+
+
+class ParseManager:
+    parsers = []
+
+    @classmethod
+    def register_parser(cls, parser):
+        cls.parsers.append(parser)
+        return parser
+    
+    @classmethod
+    def get_col_names(cls):
+        cols = [P.col_name for P in cls.parsers]
+        return cols
+    
+    @classmethod
+    def parse_text(cls, morph: MorphAnalyzer, sw, text: str):
+        tools = [P() for P in cls.parsers]
 
         for token in word_tokenize(text, language='russian'):
-            stripped_token = _strip_str(token, punkt)
+            token_type = TokenType.NOFLAG
+            stripped = _strip_str(token, punkt)
 
-            if not stripped_token:
-                tokens.append(token)
-                continue
+            if not stripped:
+                token_type = token_type | TokenType.PUNKT
 
-            anls = self.morph_.parse(stripped_token)[0]
-            
-            if anls.normal_form in self.sw_:
-                words.append(stripped_token)
-                tokens.append(token)
-                continue
+            anls = morph.parse(stripped)[0]
+
+            if anls.normal_form in sw:
+                token_type = token_type | TokenType.STOPWORD
 
             if any([tag in anls.tag for tag in stop_tags]):
-                words.append(DELETED)
-                lemmas.append(DELETED)
-                tags.append(DELETED)
-                tokens.append(DELETED)
-                continue
+                token_type = token_type | TokenType.STOPTAG
 
-            words.append(stripped_token)
-            lemmas.append(anls.normal_form)
-            tags.append(f'{len(stripped_token)}_{anls.tag.POS}')
-            tokens.append(token)
+            params = ParsingParams(token, stripped, anls, token_type)
 
-        return [' '.join(arr) for arr in [words, lemmas, tags, tokens]]
+            for p in tools:
+                p.parse_token(params)
+
+        result = [' '.join(p.tokens) for p in tools]
+        return result
+
+
+class BaseParser:
+
+    col_name = 'base'
+
+    def __init__(self):
+        self.tokens = []
+
+    def parse_token(self, params: ParsingParams):
+        raise NotImplementedError
     
+
+@ParseManager.register_parser
+class WordParser(BaseParser):
+
+    col_name = 'text_no_punkt'
+
+    def __init__(self):
+        super().__init__()
+
+    def parse_token(self, params: ParsingParams):
+        if TokenType.PUNKT in params.token_type:
+            return
+        
+        if TokenType.STOPTAG in params.token_type:
+            self.tokens.append(DELETED)
+            return
+        
+        self.tokens.append(params.stripped)
+
+
+@ParseManager.register_parser
+class LemmaParser(BaseParser):
+
+    col_name = 'lemmas'
+
+    def __init__(self):
+        super().__init__()
+
+    def parse_token(self, params: ParsingParams):
+        if TokenType.PUNKT in params.token_type or TokenType.STOPWORD in params.token_type:
+            return
+        
+        if TokenType.STOPTAG in params.token_type:
+            self.tokens.append(DELETED)
+            return
+
+        self.tokens.append(params.anls.normal_form)
+
+
+@ParseManager.register_parser
+class TagParser(BaseParser):
+
+    col_name = 'tags'
+
+    def __init__(self):
+        super().__init__()
+
+    def parse_token(self, params: ParsingParams):
+        if TokenType.PUNKT in params.token_type or TokenType.STOPWORD in params.token_type:
+            return
+        
+        if TokenType.STOPTAG in params.token_type:
+            self.tokens.append(DELETED)
+            return
+
+        self.tokens.append(f'{len(params.stripped)}_{params.anls.tag.POS}')
+
+
+@ParseManager.register_parser
+class TokenParser(BaseParser):
+
+    col_name = 'tokens'
+
+    def __init__(self):
+        super().__init__()
+
+    def parse_token(self, params: ParsingParams):
+        if TokenType.STOPTAG in params.token_type:
+            self.tokens.append(DELETED)
+            return
+        
+        self.tokens.append(params.token)
+
 
 def get_document_vectorizer(frame, n_min=1, n=2, max_count=10000, column="lemmas"):
     """
