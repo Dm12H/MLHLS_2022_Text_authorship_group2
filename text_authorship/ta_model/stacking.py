@@ -16,7 +16,6 @@ from itertools import combinations
 from xgboost import XGBClassifier
 
 
-
 class MultiTfidf(TransformerMixin, BaseEstimator):
 
     def __init__(self, cols=None, tfidf_type='classic', n_min=1, n=2, max_count=10_000):
@@ -92,7 +91,7 @@ class TAVectorizer(TransformerMixin, BaseEstimator):
 
         for vec in self.vectorizers_:
             results.append(vec.transform(X))
-        return sp.sparse.hstack(results)
+        return sp.sparse.hstack(results, format="csr")
     
 
 class TAStack2(ClassifierMixin, BaseEstimator):

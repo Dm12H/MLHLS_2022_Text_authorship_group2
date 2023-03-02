@@ -380,7 +380,7 @@ class Featurebuilder:
 
             smat, fpos = self.bulk_process(df, proc, feature_slice)
 
-            feature_matrices.append(smat)
+            feature_matrices.extend(smat)
             feature_positions.extend(fpos)
 
         final_matrix = sp.sparse.hstack(feature_matrices)
@@ -399,14 +399,14 @@ class Featurebuilder:
             last_idx = self.get_last_occurence(self.ordered_proc, proc)
             feature_slice = self.ordered_ft[first_idx:last_idx + 1]
             smat, fpos = self.bulk_process(df, proc, feature_slice)
-            feature_matrices.append(smat)
+            feature_matrices.extend(smat)
         final_matrix = sp.sparse.hstack(feature_matrices)
         return final_matrix
 
     def bulk_process(self, df, proc, featurelist):
         if proc is None:
             columns = df[featurelist].to_numpy(dtype=np.float64)
-            mat = sp.sparse.csr_matrix(columns)
+            mat = [sp.sparse.csr_matrix(columns)]
             indices = [1 for ft in featurelist]
             return mat, indices
         elif proc != "vectorizer":

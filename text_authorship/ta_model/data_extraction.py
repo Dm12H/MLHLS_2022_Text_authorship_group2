@@ -50,7 +50,7 @@ def extract_df(writers_dir, symbol_lim=3000):
     return df
 
 
-def load_df(path):
+def load_df(path, load_stats=True, count_features=True):
     """
     загружает датасет с нужными полями для работы
     """
@@ -62,6 +62,8 @@ def load_df(path):
         num_authors = len(df.author.unique())
         df["probs"] = 1 / (author_counts * num_authors)
 
-    _add_class_based_weigths(df)
-    _count_features(df)
+    if load_stats:
+        _add_class_based_weigths(df)
+    if count_features:
+        df = _count_features(df)
     return df

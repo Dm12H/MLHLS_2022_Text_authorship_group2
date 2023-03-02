@@ -1,4 +1,5 @@
 import numpy as np
+import optuna
 import pandas as pd
 from .data_preparation import get_author_vectorizer
 from .data_preparation import Featurebuilder
@@ -99,6 +100,17 @@ def train_crossval_twofold(frame, clf, *args, split=0.5, vectorizer_dict=None, a
         score = f1_score(clf.predict(x_test), y_test, average=avg)
         scores.append(score)
     return scores
+
+
+def get_encoders(df, x, arg_list, vectorizer_params):
+    if vectorizer_params == None:
+        raise ValueError("not using any vectorizer!")
+    vecs = dict()
+    for fname, params in vectorizer_params.items():
+        vecs["vec_" + fname] = get_author_vectorizer(x, **params, column=fname)
+    data_encoder = Featurebuilder(*arg_list, **vecs)
+    label_encoder = get_encoder(frame=df)
+    return data_encoder, label_encoder
 
 
 def books_cross_val(df, k=5, seed=10):
