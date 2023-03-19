@@ -12,3 +12,19 @@
 ## [План работ](checkpoint_1/README.md)
 ## [Описание данных](checkpoint_2/README.md)
 ## [Разведочный анализ](checkpoint_3/README.md)
+
+## Структура проекта
+
+- В папке `experiments` находятся ноутбуки с актуальными ноутбуками
+- папка `text_authorship/ta_model` содержит основную структуру проекта:
+    * `base_models` содержит функции для обучения актуальных моделей
+    * `data_extraction` подготавливает датасет из сырых документов и обрабатывает загрузку-выгрузку
+    * `data_preparation` собирает все признаки, использующиеся в моделях
+    * `model_selection` содержит функции для кроссвалидации и анализа результатов
+    * `stacking` содержит инструменты для энсэмблинга'
+
+## Запуск проекта
+Для запуска неободимо скачать подготовленный [датасет](https://drive.google.com/drive/folders/1S7ZPEsi2yiW5C7TP-1ICO1pZJp0YUXQ9?usp=share_link)\
+скрипт для запуска:\
+`./main.py --dataset_dir=<path-to-downloaded-dataset> --model=<logreg|stacking>`
+

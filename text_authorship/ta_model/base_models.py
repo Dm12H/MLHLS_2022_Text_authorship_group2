@@ -1,6 +1,8 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from text_authorship.ta_model import train_test_split, get_encoders
+from text_authorship.ta_model.data_preparation import get_encoder
+from text_authorship.ta_model.stacking import get_stacking
 
 
 _DEFAULT_PARAMS = {
@@ -17,7 +19,7 @@ _DEFAULT_PARAMS = {
 }
 
 
-def run_logreg(df):
+def train_logreg(df):
 
     df_train, df_test, y_train, y_test = train_test_split(df, share=0.7)
     data_enc, label_enc = get_encoders(df, df_train, _DEFAULT_PARAMS.keys(), _DEFAULT_PARAMS)
@@ -35,5 +37,18 @@ def run_logreg(df):
     clf.fit(x_train, y_train)
     y_pred = clf.predict(x_test)
     score = f1_score(y_test, y_pred, average="macro")
-    return score
+    return clf, score
+
+
+def train_stacking(df):
+    X_train, X_test, y_train, y_test = train_test_split(df)
+    encoder = get_encoder(X_train)
+    y_train, y_test = encoder.transform(y_train), encoder.transform(y_test)
+    model = get_stacking()
+    model.fit(X_train, y_train)
+    y_pred = model.predict(X_test)
+    score = f1_score(y_test, y_pred, average="macro")
+    return model, score
+
+
 
