@@ -69,13 +69,3 @@ def load_df(path, load_stats=True, count_features=True):
     return df
 
 
-if __name__ == "__main__":
-    import argparse
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument("--data_dir", help="root folder of all books", required=True)
-    argparser.add_argument("--output_dir", help="path so save prepared dataframe", required=True)
-    argparser.parse_args()
-    args = argparser.parse_args()
-    prepared_df = extract_df(args.data_dir)
-
-

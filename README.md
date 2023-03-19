@@ -25,6 +25,9 @@
 
 ## Запуск проекта
 Для запуска неободимо скачать подготовленный [датасет](https://drive.google.com/drive/folders/1S7ZPEsi2yiW5C7TP-1ICO1pZJp0YUXQ9?usp=share_link)\
-скрипт для запуска:\
+установка зависимостей:\
+`pip install -r requirements.txt`
+скрипт для запуска обучения модели\
 `./main.py --dataset_dir=<path-to-downloaded-dataset> --model=<logreg|stacking>`
-
+скрипт для подготовки датасета:\
+`./prepare_dataset.py --data_dir=<path-to-raw-data-folder> --output_dir=<path-to-output-folder>`
