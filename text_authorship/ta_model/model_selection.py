@@ -126,3 +126,15 @@ def books_cross_val(df, k=5, seed=10):
             test_idx = fold.index
         yield train_idx, test_idx
         k -= 1
+
+
+def get_top_features(label_enc, data_enc, clf, n):
+    names = label_enc.classes_
+    coeffs = clf.coef_
+    author_dict = dict()
+    for i, author in enumerate(names):
+        args_sorted = list(reversed(np.argsort(coeffs[i])[-n:]))
+        features = [data_enc.find_idx(idx) for idx in args_sorted]
+        author_dict[author] = features
+    df = pd.DataFrame(author_dict)
+    return df
