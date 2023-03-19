@@ -2,7 +2,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from text_authorship.ta_model import train_test_split, get_encoders
 from text_authorship.ta_model.data_preparation import get_encoder
-from text_authorship.ta_model.stacking import get_stacking
+from text_authorship.ta_model.stacking import TAStack2, TAVectorizer
 
 
 _DEFAULT_PARAMS = {
@@ -44,11 +44,13 @@ def train_stacking(df):
     X_train, X_test, y_train, y_test = train_test_split(df)
     encoder = get_encoder(X_train)
     y_train, y_test = encoder.transform(y_train), encoder.transform(y_test)
-    model = get_stacking()
-    model.fit(X_train, y_train)
-    y_pred = model.predict(X_test)
+    vectorizer = TAVectorizer(cols=['text_no_punkt', 'lemmas', 'tags', 'tokens'])
+    base_estimator = LogisticRegression(class_weight='balanced', max_iter=500, C=1000)
+    stacking = TAStack2(vectorizer=vectorizer, base_estimator=base_estimator, final_estimator=XGBClassifier())
+    stacking.fit(X_train, y_train)
+    y_pred = stacking.predict(X_test)
     score = f1_score(y_test, y_pred, average="macro")
-    return model, score
+    return stacking, score
 
 
 
