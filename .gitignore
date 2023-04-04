@@ -2,4 +2,5 @@
 *.csv
 *.7z
 *.zip
+*.pkl
 .ipynb_checkpoints/

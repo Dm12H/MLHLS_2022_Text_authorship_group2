@@ -2,7 +2,8 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from text_authorship.ta_model import train_test_split, get_encoders
 from text_authorship.ta_model.data_preparation import get_encoder
-from text_authorship.ta_model.stacking import TAStack2, TAVectorizer
+from text_authorship.ta_model.stacking import TAStack2, TAVectorizer, TASTack2Deploy
+from xgboost import XGBClassifier
 
 
 _DEFAULT_PARAMS = {
@@ -19,7 +20,7 @@ _DEFAULT_PARAMS = {
 }
 
 
-def train_logreg(df):
+def train_test_logreg(df):
 
     df_train, df_test, y_train, y_test = train_test_split(df, share=0.7)
     data_enc, label_enc = get_encoders(df, df_train, _DEFAULT_PARAMS.keys(), _DEFAULT_PARAMS)
@@ -40,7 +41,23 @@ def train_logreg(df):
     return clf, score
 
 
-def train_stacking(df):
+def train_logreg(df, target_col="author"):
+    target = df[target_col]
+    data_enc, label_enc = get_encoders(df, df, _DEFAULT_PARAMS.keys(), _DEFAULT_PARAMS)
+
+    features = data_enc.fit_transform(df)
+    target = label_enc.transform(target)
+
+    clf = LogisticRegression(penalty="l2",
+                             random_state=10,
+                             C=603,
+                             class_weight="balanced",
+                             max_iter=1000)
+    clf.fit(features, target)
+    return clf
+
+
+def train_test_stacking(df):
     X_train, X_test, y_train, y_test = train_test_split(df)
     encoder = get_encoder(X_train)
     y_train, y_test = encoder.transform(y_train), encoder.transform(y_test)
@@ -53,4 +70,11 @@ def train_stacking(df):
     return stacking, score
 
 
+def train_stacking(df, target_col="author"):
+    target = df[target_col]
 
+    vectorizer = TAVectorizer(cols=['text_no_punkt', 'lemmas', 'tags', 'tokens'])
+    base_estimator = LogisticRegression(class_weight='balanced', max_iter=500, C=1000)
+    stacking = TASTack2Deploy(vectorizer=vectorizer, base_estimator=base_estimator, final_estimator=XGBClassifier())
+    stacking.fit(df, target)
+    return stacking
