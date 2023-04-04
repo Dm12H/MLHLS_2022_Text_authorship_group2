@@ -1,10 +1,9 @@
 import numpy as np
-import optuna
 import pandas as pd
+from sklearn.metrics import f1_score
 from .data_preparation import get_author_vectorizer
 from .data_preparation import Featurebuilder
 from .data_preparation import get_encoder
-from sklearn.metrics import f1_score
 
 
 def select_sample(dataframe, size=0.1):
