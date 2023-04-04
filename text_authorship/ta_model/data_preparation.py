@@ -1,4 +1,5 @@
 import pandas as pd
+
 import sys
 import unicodedata
 import nltk
@@ -432,22 +433,3 @@ class Featurebuilder:
         else:
             features = vectorizer.get_feature_names_out()
             return features[idx - start]
-
-
-def load_df(path, load_stats=True, count_features=True):
-    """
-    загружает датасет с нужными полями для работы
-    """
-    df = pd.read_csv(path)
-    df['counts'] = df.book.map(df.book.value_counts())
-
-    def _add_class_based_weigths(df):
-        author_counts = df.author.map(df.author.value_counts())
-        num_authors = len(df.author.unique())
-        df["probs"] = 1 / (author_counts * num_authors)
-
-    if load_stats:
-        _add_class_based_weigths(df)
-    if count_features:
-        df = _count_features(df)
-    return df

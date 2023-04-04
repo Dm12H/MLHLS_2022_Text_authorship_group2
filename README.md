@@ -31,10 +31,3 @@
 `./main.py --dataset_dir=<path-to-downloaded-dataset> --model=<logreg|stacking>`
 скрипт для подготовки датасета:\
 `./prepare_dataset.py --data_dir=<path-to-raw-data-folder> --output_dir=<path-to-output-folder>`
-
-## Dockerfile и запуск
-
-соберите образ: \
-`docker build -t <name:tag> .` \
-запустите контейнер: \
-`docker run --name <container name> -rm -p <local port number>:8898 <name:tag>`

@@ -1,11 +1,10 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
+from text_authorship.ta_model import train_test_split, get_encoders
+from logreg import LogregModel
+from text_authorship.ta_model.data_preparation import get_encoder
+from text_authorship.ta_model.stacking import TAStack2, TAVectorizer, TASTack2Deploy
 from xgboost import XGBClassifier
-
-from .model_selection import train_test_split
-from .logreg import LogregModel
-from .data_preparation import get_encoder
-from .stacking import TAStack2, TAVectorizer, TASTack2Deploy
 
 
 def train_test_logreg(df):

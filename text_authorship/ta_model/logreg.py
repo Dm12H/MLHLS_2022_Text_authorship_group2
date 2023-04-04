@@ -4,7 +4,7 @@ from operator import itemgetter
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
-from .data_preparation import Featurebuilder, get_author_vectorizer
+from text_authorship.ta_model.data_preparation import Featurebuilder, get_author_vectorizer
 
 _DEFAULT_PARAMS = {
     "tokens": {

@@ -1,4 +1,5 @@
 from ..StatsAggregation.common import get_paragraphs
+from .data_preparation import _count_features
 
 import os
 from functools import partial, lru_cache
@@ -47,3 +48,24 @@ def extract_df(writers_dir, symbol_lim=3000):
 
     df = pd.DataFrame(pre_df, columns=['author', 'book', 'text'])
     return df
+
+
+def load_df(path, load_stats=True, count_features=True):
+    """
+    загружает датасет с нужными полями для работы
+    """
+    df = pd.read_csv(path)
+    df['counts'] = df.book.map(df.book.value_counts())
+
+    def _add_class_based_weigths(df):
+        author_counts = df.author.map(df.author.value_counts())
+        num_authors = len(df.author.unique())
+        df["probs"] = 1 / (author_counts * num_authors)
+
+    if load_stats:
+        _add_class_based_weigths(df)
+    if count_features:
+        df = _count_features(df)
+    return df
+
+
