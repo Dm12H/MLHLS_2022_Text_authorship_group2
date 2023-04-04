@@ -1,4 +1,4 @@
-from text_authorship.StatsAggregation.common import get_paragraphs
+from ..StatsAggregation.common import get_paragraphs
 
 import os
 from functools import partial, lru_cache
