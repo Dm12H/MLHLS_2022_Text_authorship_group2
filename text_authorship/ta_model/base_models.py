@@ -1,59 +1,26 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from text_authorship.ta_model import train_test_split, get_encoders
+from logreg import LogregModel
 from text_authorship.ta_model.data_preparation import get_encoder
 from text_authorship.ta_model.stacking import TAStack2, TAVectorizer, TASTack2Deploy
 from xgboost import XGBClassifier
 
 
-_DEFAULT_PARAMS = {
-    "tokens": {
-        "max_count": 15000,
-        "n_min": 1,
-        "n": 4,
-    },
-    "lemmas": {
-        "max_count": 50000,
-        "n_min": 1,
-        "n": 1
-    }
-}
-
-
 def train_test_logreg(df):
 
     df_train, df_test, y_train, y_test = train_test_split(df, share=0.7)
-    data_enc, label_enc = get_encoders(df, df_train, _DEFAULT_PARAMS.keys(), _DEFAULT_PARAMS)
-
-    x_train = data_enc.fit_transform(df_train)
-    x_test = data_enc.transform(df_test)
-    y_train = label_enc.transform(y_train)
-    y_test = label_enc.transform(y_test)
-
-    clf = LogisticRegression(penalty="l2",
-                             random_state=10,
-                             C=603,
-                             class_weight="balanced",
-                             max_iter=1000)
-    clf.fit(x_train, y_train)
-    y_pred = clf.predict(x_test)
+    clf = LogregModel()
+    clf.fit(df_train, y_train)
+    y_pred = clf.predict(df_test)
     score = f1_score(y_test, y_pred, average="macro")
     return clf, score
 
 
 def train_logreg(df, target_col="author"):
-    target = df[target_col]
-    data_enc, label_enc = get_encoders(df, df, _DEFAULT_PARAMS.keys(), _DEFAULT_PARAMS)
-
-    features = data_enc.fit_transform(df)
-    target = label_enc.transform(target)
-
-    clf = LogisticRegression(penalty="l2",
-                             random_state=10,
-                             C=603,
-                             class_weight="balanced",
-                             max_iter=1000)
-    clf.fit(features, target)
+    y_labels = df.pop(target_col)
+    clf = LogregModel()
+    clf.fit(df, y_labels)
     return clf
 
 
