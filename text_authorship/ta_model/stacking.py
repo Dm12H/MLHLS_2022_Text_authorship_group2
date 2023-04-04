@@ -9,6 +9,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.compose import ColumnTransformer
 from sklearn.base import clone
+from sklearn.preprocessing import LabelEncoder
 from .data_preparation import get_author_vectorizer, get_document_vectorizer
 from .model_selection import books_cross_val
 
@@ -136,6 +137,25 @@ class TAStack2(ClassifierMixin, BaseEstimator):
             X = self.vectorizer.transform(X)
 
         return self.model_.predict(X)
+    
+
+class TASTack2Deploy(TAStack2):
+    def __init__(self, vectorizer=None, base_estimator=None, final_estimator=None, vectorized_input=False, cv=None, dict_sizes=None):
+        super().__init__(vectorizer=vectorizer,
+                         base_estimator=base_estimator,
+                         final_estimator=final_estimator,
+                         vectorized_input=vectorized_input,
+                         cv=cv,
+                         dict_sizes=dict_sizes)
+        
+    def fit(self, X, y):
+        self.encoder_ = LabelEncoder().fit(y)
+        y = self.encoder_.transform(y)
+        super().fit(X, y)
+        return self
+    
+    def predict(self, X):
+        return self.encoder_.inverse_transform(super().predict(X))
     
 
 class TAStack(ClassifierMixin, BaseEstimator):
