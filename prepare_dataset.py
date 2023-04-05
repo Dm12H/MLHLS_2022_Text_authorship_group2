@@ -3,7 +3,7 @@ if __name__ == "__main__":
     import os
     import argparse
     import pickle
-    from text_authorship.ta_model.data_extraction import extract_df
+    from text_authorship.ta_data_extraction.data_extraction import extract_df
     from text_authorship.ta_model.data_preparation import TATransformer
 
     argparser = argparse.ArgumentParser()

@@ -28,5 +28,3 @@ async def upload_text(name: Annotated[str, Form(max_length=5000)]):
     item = pd.DataFrame({'text': [name]})
     transformed_item = transformer.transform(item)
     return model.predict(transformed_item)[0]
-
-
