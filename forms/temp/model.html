@@ -1,0 +1,21 @@
+<html xmlns="http://www.w3.org/1999/html">
+    <head>
+        <title> List of model</title>
+    </head>
+    <body>
+     <select>
+    <option value="LogReg">LogReg</option>
+    <option selected value="Stacking">Stacking</option>
+   </select>
+       <ol>
+            {% for model in model %}
+           <li>
+               <a href =" {{ url_for ('stat', path='/model/' + model)}} " >
+                   {{ model }}
+               </a>
+            </li>
+           {% endfor %}
+       </ol>
+
+    </body>
+</html>
