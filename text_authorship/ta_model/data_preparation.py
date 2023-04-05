@@ -31,7 +31,7 @@ def _strip_str(s: str, chars):
 
     return s[i:j]
 
-
+nltk.download('punkt')
 nltk.download('stopwords')
 
 
