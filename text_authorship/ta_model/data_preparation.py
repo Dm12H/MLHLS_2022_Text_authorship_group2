@@ -4,40 +4,7 @@ import pandas as pd
 import nltk
 import numpy as np
 
-from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
-
-
-def get_document_vectorizer(frame, n_min=1, n=2, max_count=10000, column="lemmas"):
-    """
-    стандартный tf-idf
-    :param frame: датафрейм для анализа
-    :param n_min: минимальный размер n-грамм
-    :param n: максимальный размер n-грамм
-    :param max_count: максимальная длина вектора фичей
-    :param column: название колонки, по которой нужно векторизировать
-    """
-    texts_vector = frame[column]
-    vectorizer = TfidfVectorizer(ngram_range=(n_min, n), max_features=max_count, norm='l2')
-    vectorizer.fit(texts_vector)
-    return vectorizer
-
-
-def get_author_vectorizer(frame, n_min=1, n=2, max_count=10000, column="lemmas"):
-    """
-    class-based tf-idf
-    :param frame: датафрейм для анализа
-    :param frame: датафрейм для анализа
-    :param n_min: минимальный размер n-грамм
-    :param n: максимальный размер n-грамм
-    :param max_count: максимальная длина вектора фичей
-    :param column: название колонки, по которой нужно векторизировать
-    """
-    grouped_text = frame.groupby("author", as_index=False)[column].agg({column: ' '.join})
-    vectorizer = TfidfVectorizer(ngram_range=(n_min, n), max_features=max_count, norm='l2')
-    texts_vector = grouped_text[column]
-    vectorizer.fit(texts_vector)
-    return vectorizer
 
 
 def get_encoder(frame, column="author"):
@@ -51,7 +18,9 @@ def split_sentences(text):
 
 
 def make_words(sentences):
-    words = list(chain(*(nltk.word_tokenize(sentence) for sentence in sentences)))
+    words = list(
+        chain(
+            *(nltk.word_tokenize(sentence) for sentence in sentences)))
     return words
 
 
@@ -88,7 +57,10 @@ def comma_density(sentences):
 
 def dialogue_density(sentences):
     long_dash = chr(8212)
-    counts = len([sentence for sentence in sentences if sentence.startswith(long_dash)])
+    counts = len(
+        [sentence
+         for sentence in sentences
+         if sentence.startswith(long_dash)])
     return counts / len(sentences)
 
 
@@ -98,7 +70,9 @@ def _count_features(df):
     temp_df = pd.DataFrame({"words": words, "sentences": tokenized_text})
     feature_map = {
         "word_avg_length": words.map(word_len_avg),
-        "words_per_sentence": temp_df.apply(lambda x: word_per_sentence(x["sentences"], x["words"]), axis=1),
+        "words_per_sentence": temp_df.apply(
+            lambda x: word_per_sentence(x["sentences"], x["words"]),
+            axis=1),
         "exclamation_density": tokenized_text.map(exclamation_density),
         "question_density": tokenized_text.map(question_density),
         "comma_density": tokenized_text.map(question_density),

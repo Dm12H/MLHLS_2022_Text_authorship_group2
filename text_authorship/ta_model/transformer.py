@@ -1,16 +1,22 @@
+import nltk
 import pandas as pd
 from nltk.corpus import stopwords
 from pymorphy2 import MorphAnalyzer
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from document_parsers import ParseManager
+from parsemanager import ParseManager
+
+nltk.download('stopwords')
 
 
 class TATransformer(BaseEstimator, TransformerMixin):
 
     _parsers = []
 
-    def __init__(self, use_stopwords=True, save_path='transformed_df.csv', load_path=None):
+    def __init__(self,
+                 use_stopwords=True,
+                 save_path='transformed_df.csv',
+                 load_path=None):
         self.use_stopwords = use_stopwords
         self.save_path = save_path
         self.load_path = load_path
@@ -21,7 +27,8 @@ class TATransformer(BaseEstimator, TransformerMixin):
         self.new_cols_ = ParseManager.get_col_names()
 
         if self.use_stopwords:
-            self.stopwords_ = self.stopwords_ | set(stopwords.words('russian'))
+            self.stopwords_ = \
+                self.stopwords_ or set(stopwords.words('russian'))
 
         return self
 

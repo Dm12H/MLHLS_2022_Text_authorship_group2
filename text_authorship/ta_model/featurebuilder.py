@@ -22,14 +22,18 @@ class FeatureBuilder:
                 self.vectorizers[feature] = None
                 continue
             if processor != "vectorizer":
-                raise ValueError("only vectorizing is supported for non-scalar features")
+                raise ValueError(
+                    "only vectorizing is supported for non-scalar features")
             vectorizer = vectorizers.get(feature, None)
             if vectorizer is None:
                 raise ValueError(f"no vectorizer for feature: {feature}")
             self.vectorizers[feature] = vectorizer
-        self.ordered_ft = list(sorted(featurelist,
-                                      key=lambda x: self.feature_mapping.get(x, "")))
-        self.ordered_proc = [self.feature_mapping.get(ft, None) for ft in self.ordered_ft]
+        self.ordered_ft = list(
+            sorted(featurelist,
+                   key=lambda x: self.feature_mapping.get(x, "")))
+        self.ordered_proc = [self.feature_mapping.get(ft, None)
+                             for ft
+                             in self.ordered_ft]
         self._initialized = False
         self.feature_idx = None
 
@@ -50,7 +54,9 @@ class FeatureBuilder:
         first_idx = self.get_first_occurence(self.ordered_proc, processor)
         last_idx = self.get_last_occurence(self.ordered_proc, processor)
         feature_slice = self.ordered_ft[first_idx:last_idx + 1]
-        feature_mat, positions = self.bulk_process(df, processor, feature_slice)
+        feature_mat, positions = self.bulk_process(df,
+                                                   proc=processor,
+                                                   featurelist=feature_slice)
         return feature_mat, positions
 
     def fit_transform(self, df):

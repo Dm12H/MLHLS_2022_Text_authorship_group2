@@ -1,7 +1,7 @@
 import numpy as np
 import optuna
 import pandas as pd
-from .data_preparation import get_author_vectorizer
+from vectorizers import get_author_vectorizer
 from text_authorship.ta_model import FeatureBuilder
 from .data_preparation import get_encoder
 from sklearn.metrics import f1_score
@@ -14,7 +14,9 @@ def select_sample(dataframe, size=0.1):
     :param size: доля общей выборки
     """
     df_size = len(dataframe)
-    idx = np.random.choice(df_size, size=int(df_size * size), p=dataframe.probs)
+    idx = np.random.choice(df_size,
+                           size=int(df_size * size),
+                           p=dataframe.probs)
     return dataframe.iloc[idx]
 
 
@@ -54,7 +56,8 @@ def train_test_split(df, share=0.5, seed=10, cross_val=False):
     :param df: датафрейм для анализа
     :param share: процент данных для трейна ( тест, соответственно 1-share)
     :param seed: сид для случайных перемешиваний
-    :param cross_val: флаг для использования в кросс-валидации (более жесткие требования к делению)
+    :param cross_val: флаг для использования в кросс-валидации
+        (более жесткие требования к делению)
     :return:
     """
     rg = np.random.default_rng(seed)
@@ -67,8 +70,14 @@ def train_test_split(df, share=0.5, seed=10, cross_val=False):
     test_counts = 0
 
     for label in shuffled_labels:
-        shuffled_books = _shuffle_books(df=df, author=label, random_gen=rg, cross_val=cross_val)
-        split_idx, segm_train, total_semg = _split_books_to_target(shuffled_books, share)
+        shuffled_books = _shuffle_books(
+            df=df,
+            author=label,
+            random_gen=rg,
+            cross_val=cross_val)
+        split_idx, segm_train, total_semg = _split_books_to_target(
+            shuffled_books,
+            share)
 
         train_label.extend(shuffled_books.iloc[:split_idx].book)
         test_label.extend(shuffled_books.iloc[split_idx:].book)
@@ -84,8 +93,27 @@ def train_test_split(df, share=0.5, seed=10, cross_val=False):
     return train_df, test_df, y_train, y_test
 
 
-def train_crossval_twofold(frame, clf, *args, split=0.5, vectorizer_dict=None, avg="micro"):
-    x_split1, x_split2, y_split1, y_split2 = train_test_split(frame, share=split)
+def train_crossval_twofold(
+        frame,
+        clf,
+        *args,
+        split=0.5,
+        vectorizer_dict=None,
+        avg="micro"):
+    """
+    функция, обучающая классификатор на двухфолдовой кроссвалидации
+    :param frame: Dataframe с данными
+    :param clf: модель для обучения
+    :param args: список колонок модели для использовании в обучении
+    :param split: доля обучающей выборки в сплите:[0,1]
+    :param vectorizer_dict: словарь классов,
+        отвечающих за векторизацию конкретного признака
+    :param avg: режим усреднения f1_score для оценки качества обучения
+    :return:
+    """
+    x_split1, x_split2, y_split1, y_split2 = train_test_split(
+        frame,
+        share=split)
     pair1 = x_split1, y_split1
     pair2 = x_split2, y_split2
     scores = []
@@ -97,7 +125,10 @@ def train_crossval_twofold(frame, clf, *args, split=0.5, vectorizer_dict=None, a
             raise ValueError("not using any vectorizer!")
         vecs = dict()
         for fname, params in vectorizer_dict.items():
-            vecs["vec_" + fname] = get_author_vectorizer(df_train, **params, column=fname)
+            vecs["vec_" + fname] = get_author_vectorizer(
+                df_train,
+                **params,
+                column=fname)
 
         data_encoder = FeatureBuilder(*args, **vecs)
         x_train = data_encoder.fit_transform(df_train)
@@ -118,7 +149,10 @@ def get_encoders(df, x, arg_list, vectorizer_params):
         raise ValueError("not using any vectorizer!")
     vecs = dict()
     for fname, params in vectorizer_params.items():
-        vecs[f"vec_{fname}"] = get_author_vectorizer(x, **params, column=fname)
+        vecs[f"vec_{fname}"] = get_author_vectorizer(
+            x,
+            **params,
+            column=fname)
     data_encoder = FeatureBuilder(*arg_list, **vecs)
     label_encoder = get_encoder(frame=df)
     return data_encoder, label_encoder
@@ -132,7 +166,11 @@ def books_cross_val(df, k=5, seed=10):
             test_idx = df_remain.index
         else:
             share = (k - 1) / k
-            df_remain, fold, _, _ = train_test_split(df_remain, share=share, seed=seed, cross_val=True)
+            df_remain, fold, _, _ = train_test_split(
+                df_remain,
+                share=share,
+                seed=seed,
+                cross_val=True)
             train_idx = df.index.difference(fold.index)
             test_idx = fold.index
         yield train_idx, test_idx

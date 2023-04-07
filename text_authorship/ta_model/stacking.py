@@ -9,7 +9,7 @@ from sklearn.pipeline import make_pipeline
 from sklearn.linear_model import LogisticRegression
 from sklearn.compose import ColumnTransformer
 from sklearn.base import clone
-from .data_preparation import get_author_vectorizer, get_document_vectorizer
+from vectorizers import get_document_vectorizer, get_author_vectorizer
 from .model_selection import books_cross_val
 
 from itertools import combinations
@@ -18,7 +18,13 @@ from xgboost import XGBClassifier
 
 class MultiTfidf(TransformerMixin, BaseEstimator):
 
-    def __init__(self, cols=None, tfidf_type='classic', n_min=1, n=2, max_count=10_000):
+    def __init__(
+            self,
+            cols=None,
+            tfidf_type='classic',
+            n_min=1,
+            n=2,
+            max_count=10_000):
         self.cols = cols
         self.tfidf_type = tfidf_type
         self.n_min = n_min
@@ -33,15 +39,15 @@ class MultiTfidf(TransformerMixin, BaseEstimator):
         else:
             raise ValueError("Unknown vectorizer")
         self.vectorizers_ = [get_vectorizer(
-                X, 
+                X,
                 n_min=self.n_min, 
                 n=self.n, 
                 max_count=self.max_count, 
                 column=col
                 ) for col in self.cols]
         
-        self.dict_size_ = sum([len(vec.vocabulary_) for vec in self.vectorizers_])
-
+        self.dict_size_ = sum(
+            [len(vec.vocabulary_) for vec in self.vectorizers_])
         return self
     
     def transform(self, X, y=None):
@@ -59,7 +65,14 @@ class MultiTfidf(TransformerMixin, BaseEstimator):
 
 class TAVectorizer(TransformerMixin, BaseEstimator):
 
-    def __init__(self, cols=None, k=2, tfidf_type='classic', n_min=1, n=2, max_count=10_000):
+    def __init__(
+            self,
+            cols=None,
+            k=2,
+            tfidf_type='classic',
+            n_min=1,
+            n=2,
+            max_count=10_000):
         self.cols = cols
         self.k = k
         self.tfidf_type = tfidf_type
@@ -96,7 +109,13 @@ class TAVectorizer(TransformerMixin, BaseEstimator):
 
 class TAStack2(ClassifierMixin, BaseEstimator):
 
-    def __init__(self, vectorizer=None, base_estimator=None, final_estimator=None, vectorized_input=False, cv=None, dict_sizes=None):
+    def __init__(self,
+                 vectorizer=None,
+                 base_estimator=None,
+                 final_estimator=None,
+                 vectorized_input=False,
+                 cv=None,
+                 dict_sizes=None):
         self.vectorizer = vectorizer
         self.base_estimator = base_estimator
         self.final_estimator = final_estimator
@@ -116,7 +135,8 @@ class TAStack2(ClassifierMixin, BaseEstimator):
         border_idx = np.cumsum(self.dict_sizes)
 
         for i, idx in enumerate(border_idx):
-            cols_to_keep = np.arange(border_idx[i - 1], idx) if i > 0 else np.arange(idx)
+            cols_to_keep = np.arange(
+                border_idx[i - 1], idx) if i > 0 else np.arange(idx)
             column_choice = ColumnTransformer([
                 ('_', 'passthrough', cols_to_keep)
             ])
@@ -127,8 +147,10 @@ class TAStack2(ClassifierMixin, BaseEstimator):
                 )
             )
 
-        self.model_ = StackingClassifier(base_pipes, self.final_estimator, cv=self.cv).fit(X, y)
-        
+        self.model_ = StackingClassifier(
+            base_pipes,
+            final_estimator=self.final_estimator,
+            cv=self.cv).fit(X, y)
         return self
     
     def predict(self, X):
@@ -143,11 +165,14 @@ class TAStack(ClassifierMixin, BaseEstimator):
     def __init__(self, estimators=None, final_estimator=None):
         self.estimators = estimators
         self.final_estimator = final_estimator
-    
+
     def fit(self, X, y):
         X = X.reset_index(drop=True)
         cv = books_cross_val(X)
-        self.model_ = StackingClassifier(self.estimators, self.final_estimator, cv=cv)
+        self.model_ = StackingClassifier(
+            self.estimators,
+            final_estimator=self.final_estimator,
+            cv=cv)
         self.model_.fit(X, y)
         return self
     
@@ -169,15 +194,25 @@ class TAStack(ClassifierMixin, BaseEstimator):
 
 def get_base_estimator(cols, vec_type='classic'):
     pipe = Pipeline([
-        ('vectorizer', MultiTfidf(cols=cols, tfidf_type=vec_type)),
-        ('model', LogisticRegression(class_weight='balanced', max_iter=500, C=1000))
+        ('vectorizer', MultiTfidf(
+            cols=cols,
+            tfidf_type=vec_type)),
+        ('model', LogisticRegression(
+            class_weight='balanced',
+            max_iter=500,
+            C=1000))
     ])
     return pipe
 
 
 def get_stacking(vec_type='classic'):
     estimators = []
-    for cols in combinations(['text_no_punkt', 'lemmas', 'tags', 'tokens'], 2):
-        estimators.append((';'.join(cols), get_base_estimator(cols, vec_type=vec_type)))
+    col_combinations = combinations(
+        ['text_no_punkt', 'lemmas', 'tags', 'tokens'],
+        2)
+    for cols in col_combinations:
+        estimators.append(
+            (';'.join(cols),
+             get_base_estimator(cols, vec_type=vec_type)))
 
     return TAStack(estimators, XGBClassifier())

@@ -10,15 +10,20 @@ import pandas as pd
 
 
 @lru_cache(maxsize=1)
-def get_books(writer, writers_dir, cutoff=-2):
+def get_books(writer, writers_dir):
     book_list = os.listdir(os.path.join(writers_dir, writer))
     full_book_path = partial(os.path.join, writers_dir, writer)
     books = {}
     for book_name in book_list:
         book = epub.read_epub(full_book_path(book_name))
-        chapters = (book.get_item_with_id(chapter_id) for chapter_id, _ in book.spine)
-        text_chapters = [ch for ch in chapters if ch.get_type() == ebooklib.ITEM_DOCUMENT]
-        books[book_name] = list(it.chain.from_iterable(map(get_paragraphs, text_chapters)))
+        chapters = (book.get_item_with_id(chapter_id)
+                    for chapter_id, _
+                    in book.spine)
+        text_chapters = [ch for ch in chapters
+                         if ch.get_type() == ebooklib.ITEM_DOCUMENT]
+        books[book_name] = list(
+            it.chain.from_iterable(
+                map(get_paragraphs, text_chapters)))
     return books
 
 
