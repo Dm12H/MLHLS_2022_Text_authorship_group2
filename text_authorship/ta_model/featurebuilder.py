@@ -81,7 +81,7 @@ class FeatureBuilder:
         if proc is None:
             columns = df[featurelist].to_numpy(dtype=np.float64)
             mat = [sp.sparse.csr_matrix(columns)]
-            indices = [1 for ft in featurelist]
+            indices = [1 for _ in featurelist]
             return mat, indices
         elif proc != "vectorizer":
             raise ValueError("only vectorizers supported now")

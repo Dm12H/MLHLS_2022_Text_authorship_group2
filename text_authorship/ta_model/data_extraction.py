@@ -69,5 +69,3 @@ def load_df(path, load_stats=True, count_features=True):
     if count_features:
         df = _count_features(df)
     return df
-
-

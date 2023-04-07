@@ -50,10 +50,12 @@ def _shuffle_books(df, author, random_gen, cross_val=True):
 
 def train_test_split(df, share=0.5, seed=10, cross_val=False):
     """
-    разделяет данные на обучающую и тестовую выборки по книгам
+        разделяет данные на обучающую и тестовую выборки по книгам
     :param df: датафрейм для анализа
     :param share: процент данных для трейна ( тест, соответственно 1-share)
     :param seed: сид для случайных перемешиваний
+    :param cross_val: флаг для использования в кросс-валидации (более жесткие требования к делению)
+    :return:
     """
     rg = np.random.default_rng(seed)
     labels = df.author.unique()
@@ -112,7 +114,7 @@ def train_crossval_twofold(frame, clf, *args, split=0.5, vectorizer_dict=None, a
 
 
 def get_encoders(df, x, arg_list, vectorizer_params):
-    if vectorizer_params == None:
+    if vectorizer_params is None:
         raise ValueError("not using any vectorizer!")
     vecs = dict()
     for fname, params in vectorizer_params.items():
