@@ -1,14 +1,13 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from text_authorship.ta_model import train_test_split, get_encoders
-from logreg import LogregModel
+from text_authorship.ta_model.logreg import LogregModel
 from text_authorship.ta_model.data_preparation import get_encoder
 from text_authorship.ta_model.stacking import TAStack2, TAVectorizer, TASTack2Deploy
 from xgboost import XGBClassifier
 
 
 def train_test_logreg(df):
-
     df_train, df_test, y_train, y_test = train_test_split(df, share=0.7)
     clf = LogregModel()
     clf.fit(df_train, y_train)

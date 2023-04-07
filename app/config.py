@@ -46,15 +46,7 @@ def get_settings() -> ModelConfig:
     return ModelConfig()
 
 
-def set_logs():
-    settings = get_settings()
-    logging.config.dictConfig(settings.log_config)
-
-
 def get_model_names() -> list[str]:
     settings = get_settings()
     models = list(settings.model_paths.keys())
     return models
-
-
-SettingsDep = Annotated[ModelConfig, Depends(get_settings)]
