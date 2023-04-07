@@ -51,9 +51,12 @@ def extract_df(writers_dir, symbol_lim=3000):
         for book, text in get_data_for_df(writer=writer,
                                           writers_dir=writers_dir,
                                           symbol_lim=symbol_lim):
-            pre_df.append([writer, book, text])
+            pre_df.append(
+                {"author": writer,
+                 "book": book,
+                 "text": text})
 
-    df = pd.DataFrame(pre_df, columns=['author', 'book', 'text'])
+    df = pd.DataFrame(pre_df)
     return df
 
 
