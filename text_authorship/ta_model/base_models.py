@@ -4,8 +4,8 @@ from xgboost import XGBClassifier
 
 from text_authorship.ta_model import train_test_split, get_encoders
 from text_authorship.ta_model.data_preparation import get_encoder
-from text_authorship.ta_model.stacking import TAStack2, TAVectorizer
-
+from stacking.tastack2 import TAStack2
+from stacking.tavectorizer import TAVectorizer
 
 _FEATURE_PARAMS = {
     "tokens": {

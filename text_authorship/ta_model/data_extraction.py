@@ -45,7 +45,7 @@ def get_data_for_df(writer, writers_dir, symbol_lim=3000):
 
 
 @lru_cache(maxsize=1)
-def extract_df(writers_dir, symbol_lim=3000):    
+def extract_df(writers_dir, symbol_lim=3000):
     pre_df = []
     for writer in os.listdir(writers_dir):
         for book, text in get_data_for_df(writer=writer,

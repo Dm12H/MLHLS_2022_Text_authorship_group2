@@ -1,5 +1,4 @@
 import numpy as np
-import optuna
 import pandas as pd
 from vectorizers import get_author_vectorizer
 from text_authorship.ta_model import FeatureBuilder

@@ -11,7 +11,7 @@ def get_encoder(frame, column="author"):
     encoder = LabelEncoder()
     encoder.fit(frame[column])
     return encoder
-    
+
 
 def split_sentences(text):
     return nltk.sent_tokenize(text)
