@@ -1,5 +1,5 @@
 from itertools import chain
-
+from typing import List
 import pandas as pd
 import nltk
 import numpy as np
@@ -7,17 +7,19 @@ import numpy as np
 from sklearn.preprocessing import LabelEncoder
 
 
-def get_encoder(frame, column="author"):
+def get_encoder(
+        frame: pd.DataFrame,
+        column: str = "author") -> LabelEncoder:
     encoder = LabelEncoder()
     encoder.fit(frame[column])
     return encoder
 
 
-def split_sentences(text):
+def split_sentences(text: str) -> List[str]:
     return nltk.sent_tokenize(text)
 
 
-def make_words(sentences):
+def make_words(sentences: List[str]) -> List[str]:
     words = list(
         chain(
             *(nltk.word_tokenize(sentence) for sentence in sentences)))
