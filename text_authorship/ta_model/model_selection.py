@@ -18,6 +18,36 @@ def select_sample(dataframe, size=0.1):
     return dataframe.iloc[idx]
 
 
+def _split_books_to_target(books, target):
+    label_train_count = 0
+    label_total_count = np.sum(books["counts"])
+    i = 0
+    for _, row in books.iloc[:-1].iterrows():
+        num_segments = row.counts
+        if not label_train_count:
+            i += 1
+            label_train_count += num_segments
+            continue
+        new_train_count = label_train_count + num_segments
+        new_share = new_train_count / label_total_count
+        old_share = label_train_count / label_total_count
+        if abs(target - new_share) > abs(target - old_share):
+            break
+        i += 1
+        label_train_count += num_segments
+    return i, label_train_count, label_total_count
+
+
+def _shuffle_books(df, author, random_gen, cross_val=True):
+    df_slice = df[df.author == author][["book", "counts"]]
+    unique_books = df_slice.drop_duplicates("book")
+    if len(unique_books) < 2 and not cross_val:
+        raise ValueError(f"too few books of author: {author}")
+    permunation = random_gen.permutation(len(unique_books))
+    shuffled_books = unique_books.iloc[permunation]
+    return shuffled_books
+
+
 def train_test_split(df, share=0.5, seed=10, cross_val=False):
     """
     разделяет данные на обучающую и тестовую выборки по книгам
@@ -35,32 +65,14 @@ def train_test_split(df, share=0.5, seed=10, cross_val=False):
     test_counts = 0
 
     for label in shuffled_labels:
-        df_slice = df[df.author == label][["book", "counts"]]
-        unique_books = df_slice.drop_duplicates("book")
-        if len(unique_books) < 2 and not cross_val:
-            raise ValueError(f"too few books of author: {label}")
-        permunation = rg.permutation(len(unique_books))
-        shuffled_books = unique_books.iloc[permunation]
-        label_train_count = 0
-        label_total_count = np.sum(shuffled_books["counts"])
-        i = 0
-        for _, row in shuffled_books.iloc[:-1].iterrows():
-            num_segments = row.counts
-            if not label_train_count:
-                i += 1
-                label_train_count += num_segments
-                continue
-            new_train_count = label_train_count + num_segments
-            new_share = new_train_count / label_total_count
-            old_share = label_train_count / label_total_count
-            if abs(share - new_share) > abs(share - old_share):
-                break
-            i += 1
-            label_train_count += num_segments
-        train_label.extend(shuffled_books.iloc[:i].book)
-        test_label.extend(shuffled_books.iloc[i:].book)
-        train_counts += label_train_count
-        test_counts += label_total_count - label_train_count
+        shuffled_books = _shuffle_books(df=df, author=label, random_gen=rg, cross_val=cross_val)
+        split_idx, segm_train, total_semg = _split_books_to_target(shuffled_books, share)
+
+        train_label.extend(shuffled_books.iloc[:split_idx].book)
+        test_label.extend(shuffled_books.iloc[split_idx:].book)
+        train_counts += segm_train
+        test_counts += total_semg - segm_train
+
     train_df = df[df["book"].isin(set(train_label))]
     test_df = df[df["book"].isin(set(test_label))]
     assert len(train_df) + len(test_df) == len(df), \
@@ -71,18 +83,15 @@ def train_test_split(df, share=0.5, seed=10, cross_val=False):
 
 
 def train_crossval_twofold(frame, clf, *args, split=0.5, vectorizer_dict=None, avg="micro"):
-    split = train_test_split(frame, share=split)
-    x_split = split[:2]
-    y_split = split[2:]
+    x_split1, x_split2, y_split1, y_split2 = train_test_split(frame, share=split)
+    pair1 = x_split1, y_split1
+    pair2 = x_split2, y_split2
     scores = []
-    for train_idx, test_idx in ((1, 0), (0, 1)):
-        df_train = x_split[train_idx]
-        df_test = x_split[test_idx]
+    for train_pair, test_pair in (pair1, pair2):
+        df_train, y_train = train_pair
+        df_test, y_test = test_pair
 
-        y_train = y_split[train_idx]
-        y_test = y_split[test_idx]
-
-        if vectorizer_dict == None:
+        if vectorizer_dict is None:
             raise ValueError("not using any vectorizer!")
         vecs = dict()
         for fname, params in vectorizer_dict.items():
