@@ -6,9 +6,8 @@ class SessionId:
         self._lock = Lock()
 
     def get_session_id(self):
-        new_session = self.id
-
         with self._lock:
+            new_session = self.id
             self.id += 1
 
         return new_session

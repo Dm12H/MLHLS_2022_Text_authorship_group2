@@ -1,0 +1,29 @@
+transformer_path: 'tatransformer.pkl'
+model_paths:
+  logreg: 'talogreg.pkl'
+  stacking: 'tastack_deploy.pkl'
+log_config:
+  version: 1
+  formatters:
+    basic:
+      format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+      datefmt: '%d-%b-%y %H:%M:%S'
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: basic
+      level: INFO
+      stream: ext://sys.stdout
+  loggers:
+    app.app_models.model_manager:
+      level: INFO
+      handlers: [console]
+      propagate: no
+    app.app_models.inference:
+      level: INFO
+      handlers: [console]
+      propagate: no
+  root:
+    level: INFO
+    handlers: [console]
+  disable_existing_loggers: no
