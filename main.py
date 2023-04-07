@@ -4,8 +4,8 @@ from fastapi.templating import Jinja2Templates
 from typing import Annotated
 from text_authorship.ta_model.stacking import TASTack2Deploy
 from text_authorship.ta_model.data_preparation import TATransformer
-from service_tools.session_id import SessionId
-from service_tools.logs import log_conection, log_duration
+from app.session_id import SessionId
+from app.logs import log_connection, log_duration
 
 import pickle
 import pandas as pd
@@ -21,23 +21,25 @@ with open('logconfig.yml', 'r') as f:
     config = yaml.safe_load(f.read())
     logging.config.dictConfig(config)
 
+logger = logging.getLogger(__name__)
+
 session_counter = SessionId()
 
 app = FastAPI()
 
-templates = Jinja2Templates(directory="forms/temp")
+templates = Jinja2Templates(directory="app/forms/temp")
 
-app.mount("/stat", StaticFiles(directory="forms/stat"), name="stat")
+app.mount("/stat", StaticFiles(directory="app/forms/stat"), name="stat")
 
 
 @app.middleware('http')
 async def log_request(request: Request, call_next):
     session_id = session_counter.get_session_id()
-    log_conection(__name__, id=session_id, request=request)
+    log_connection(logger, id=session_id, request=request)
     start = time.time()
     resp = await call_next(request)
     duration = (time.time() - start) * 1000
-    log_duration(__name__, id=session_id, duration=duration)
+    log_duration(logger, id=session_id, duration=duration)
     return resp
 
 
