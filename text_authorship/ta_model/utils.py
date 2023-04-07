@@ -25,7 +25,7 @@ class TrainingArgumentParser(ArgumentParser):
         super().__init__()
         super().add_argument("--prepared_data",
                              help="source of prepared dataset",
-                             default=None, )
+                             default=None)
         super().add_argument("--model",
                              help="which model to train",
                              default=None)
