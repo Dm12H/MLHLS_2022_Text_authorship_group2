@@ -2,7 +2,7 @@ import numpy as np
 import optuna
 import pandas as pd
 from .data_preparation import get_author_vectorizer
-from .data_preparation import Featurebuilder
+from .data_preparation import FeatureBuilder
 from .data_preparation import get_encoder
 from sklearn.metrics import f1_score
 
@@ -88,7 +88,7 @@ def train_crossval_twofold(frame, clf, *args, split=0.5, vectorizer_dict=None, a
         for fname, params in vectorizer_dict.items():
             vecs["vec_" + fname] = get_author_vectorizer(df_train, **params, column=fname)
 
-        data_encoder = Featurebuilder(*args, **vecs)
+        data_encoder = FeatureBuilder(*args, **vecs)
         x_train = data_encoder.fit_transform(df_train)
         x_test = data_encoder.fit_transform(df_test)
 
@@ -107,8 +107,8 @@ def get_encoders(df, x, arg_list, vectorizer_params):
         raise ValueError("not using any vectorizer!")
     vecs = dict()
     for fname, params in vectorizer_params.items():
-        vecs["vec_" + fname] = get_author_vectorizer(x, **params, column=fname)
-    data_encoder = Featurebuilder(*arg_list, **vecs)
+        vecs[f"vec_{fname}"] = get_author_vectorizer(x, **params, column=fname)
+    data_encoder = FeatureBuilder(*arg_list, **vecs)
     label_encoder = get_encoder(frame=df)
     return data_encoder, label_encoder
 

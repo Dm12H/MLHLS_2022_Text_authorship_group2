@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
+
+from text_authorship.ta_model import load_df
+from text_authorship.ta_model.base_models import train_logreg, train_stacking
+from text_authorship.ta_model.utils import TrainingArgumentParser
+
+
 if __name__ == "__main__":
-
-    import argparse
-    from text_authorship.ta_model import load_df
-    from text_authorship.ta_model.base_models import train_logreg, train_stacking
-
-    argparser = argparse.ArgumentParser()
-    argparser.add_argument("--prepared_data", help="source of prepared dataset", default=None)
-    argparser.add_argument("--model", help="which model to train", default=None)
-    args = argparser.parse_args()
+    args = TrainingArgumentParser().parse_args()
 
     if args.prepared_data:
         print("LOADING DATA")

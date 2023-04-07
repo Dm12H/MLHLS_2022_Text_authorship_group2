@@ -17,7 +17,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import LabelEncoder
 
 
-punkt = {chr(i) for i in range(sys.maxunicode) if unicodedata.category(chr(i)).startswith('P')}
+PUNKT = {chr(i) for i in range(sys.maxunicode) if unicodedata.category(chr(i)).startswith('P')}
 
 
 def _strip_str(s: str, chars):
@@ -35,7 +35,7 @@ def _strip_str(s: str, chars):
 nltk.download('stopwords')
 
 
-stop_tags = [
+STOP_TAGS = [
     'Abbr',
     'Name',
     'Surn',
@@ -59,11 +59,11 @@ class TATransformer(BaseEstimator, TransformerMixin):
     
     def fit(self, X: pd.DataFrame, y=None):
         self.morph_ = MorphAnalyzer()
-        self.sw_ = set()
+        self.stopwords_ = set()
         self.new_cols_ = ParseManager.get_col_names()
 
         if self.use_stopwords:
-            self.sw_ = self.sw_ | set(stopwords.words('russian'))
+            self.stopwords_ = self.stopwords_ | set(stopwords.words('russian'))
 
         return self
     
@@ -84,13 +84,15 @@ class TATransformer(BaseEstimator, TransformerMixin):
                 new_data
             ], axis=1)
 
-            if self.save_path and self.save_path.endswith('.csv'):
+            if self.save_path:
+                if not self.save_path.endswith('.csv'):
+                    raise ValueError("expected csv destination file")
                 X.to_csv(self.save_path, index=False)
 
         return X
     
     def parse_text(self, text: str):
-        return ParseManager.parse_text(self.morph_, self.sw_, text)
+        return ParseManager.parse_text(self.morph_, self.stopwords_, text)
     
 
 class TokenType(Flag):
@@ -113,7 +115,7 @@ class ParseManager:
     
     @classmethod
     def get_col_names(cls):
-        cols = [P.col_name for P in cls.parsers]
+        cols = [parser.col_name for parser in cls.parsers]
         return cols
     
     @classmethod
@@ -122,7 +124,7 @@ class ParseManager:
 
         for token in word_tokenize(text, language='russian'):
             token_type = TokenType.NOFLAG
-            stripped = _strip_str(token, punkt)
+            stripped = _strip_str(token, PUNKT)
 
             if not stripped:
                 token_type = token_type | TokenType.PUNKT
@@ -132,10 +134,13 @@ class ParseManager:
             if anls.normal_form in sw:
                 token_type = token_type | TokenType.STOPWORD
 
-            if any([tag in anls.tag for tag in stop_tags]):
+            if any([tag in anls.tag for tag in STOP_TAGS]):
                 token_type = token_type | TokenType.STOPTAG
 
-            params = ParsingParams(token, stripped, anls, token_type)
+            params = ParsingParams(token=token,
+                                   stripped=stripped,
+                                   anls=anls,
+                                   token_type=token_type)
 
             for p in tools:
                 p.parse_token(params)
@@ -286,19 +291,24 @@ def word_per_sentence(sentences, words):
     return np.log(num_words / num_sentences)
 
 
+def count_occurences(token, sentences):
+    count = len([s for s in sentences if token in s])
+    return count
+
+
 def exclamation_density(sentences):
-    exclamations_cnt = len([s for s in sentences if '!' in s])
+    exclamations_cnt = count_occurences(token="!", sentences=sentences)
     return exclamations_cnt / len(sentences)
 
 
 def question_density(sentences):
-    questions_cnt = len([s for s in sentences if '?' in s])
+    questions_cnt = count_occurences(token='?', sentences=sentences)
     return questions_cnt / len(sentences)
 
 
 def comma_density(sentences):
-    questions_cnt = sum([s.count(",") for s in sentences])
-    return questions_cnt / len(sentences)
+    comma_cnt = count_occurences(token=',', sentences=sentences)
+    return comma_cnt / len(sentences)
 
 
 def dialogue_density(sentences):
@@ -330,7 +340,7 @@ def check_seq(val):
     return iterable and not_string
 
 
-class Featurebuilder:
+class FeatureBuilder:
     feature_mapping = {"tokens": "vectorizer",
                        "text_no_punkt": "vectorizer",
                        "lemmas": "vectorizer",
@@ -370,19 +380,20 @@ class Featurebuilder:
     def get_first_occurence(seq, val):
         return seq.index(val)
 
+    def _group_transform_features(self, df,  processor):
+        first_idx = self.get_first_occurence(self.ordered_proc, processor)
+        last_idx = self.get_last_occurence(self.ordered_proc, processor)
+        feature_slice = self.ordered_ft[first_idx:last_idx + 1]
+        feature_mat, positions = self.bulk_process(df, processor, feature_slice)
+        return feature_mat, positions
+
     def fit_transform(self, df):
         feature_positions = []
         feature_matrices = []
         for proc in set(self.ordered_proc):
-            first_idx = self.get_first_occurence(self.ordered_proc, proc)
-            last_idx = self.get_last_occurence(self.ordered_proc, proc)
-            feature_slice = self.ordered_ft[first_idx:last_idx + 1]
-
-            smat, fpos = self.bulk_process(df, proc, feature_slice)
-
-            feature_matrices.extend(smat)
-            feature_positions.extend(fpos)
-
+            featuremat, positions = self._group_transform_features(df, proc)
+            feature_matrices.extend(featuremat)
+            feature_positions.extend(positions)
         final_matrix = sp.sparse.hstack(feature_matrices)
         counter = 0
         self.feature_idx = dict()
@@ -395,11 +406,8 @@ class Featurebuilder:
     def transform(self, df):
         feature_matrices = []
         for proc in set(self.ordered_proc):
-            first_idx = self.get_first_occurence(self.ordered_proc, proc)
-            last_idx = self.get_last_occurence(self.ordered_proc, proc)
-            feature_slice = self.ordered_ft[first_idx:last_idx + 1]
-            smat, fpos = self.bulk_process(df, proc, feature_slice)
-            feature_matrices.extend(smat)
+            featuremat, positions = self._group_transform_features(df, proc)
+            feature_matrices.extend(featuremat)
         final_matrix = sp.sparse.hstack(feature_matrices)
         return final_matrix
 

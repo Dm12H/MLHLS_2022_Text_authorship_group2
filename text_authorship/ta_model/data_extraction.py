@@ -43,7 +43,9 @@ def get_data_for_df(writer, writers_dir, symbol_lim=3000):
 def extract_df(writers_dir, symbol_lim=3000):    
     pre_df = []
     for writer in os.listdir(writers_dir):
-        for book, text in get_data_for_df(writer, writers_dir, symbol_lim):
+        for book, text in get_data_for_df(writer=writer,
+                                          writers_dir=writers_dir,
+                                          symbol_lim=symbol_lim):
             pre_df.append([writer, book, text])
 
     df = pd.DataFrame(pre_df, columns=['author', 'book', 'text'])
