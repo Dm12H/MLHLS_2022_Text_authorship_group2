@@ -2,11 +2,11 @@ FROM python:3.10-buster
 ENV PROJECT_PATH="/ta_project"
 ENV VENV_PATH=$PROJECT_PATH/venv \
     MODEL_PATH=$PROJECT_PATH/text_authorship/ta_model \
-    SERVER_PATH=$PROJECT_PATH/forms
-RUN mkdir -p $SERVER_PATH && mkdir -p $MODEL_PATH
-COPY forms/ $SERVER_PATH
+    APP_PATH=$PROJECT_PATH/app
+RUN mkdir -p $APP_PATH && mkdir -p $MODEL_PATH
 COPY text_authorship/ta_model/ $MODEL_PATH
-COPY main.py tastack_deploy.pkl tatransformer.pkl $PROJECT_PATH/
+COPY app/ $APP_PATH
+COPY main.py tastack_deploy.pkl tatransformer.pkl logconfig.yml $PROJECT_PATH/
 RUN useradd -ms /bin/bash modelserver &&  \
     chown -R modelserver $PROJECT_PATH
 USER modelserver
