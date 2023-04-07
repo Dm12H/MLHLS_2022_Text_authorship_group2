@@ -6,7 +6,7 @@ ENV VENV_PATH=$PROJECT_PATH/venv \
 RUN mkdir -p $APP_PATH && mkdir -p $MODEL_PATH
 COPY text_authorship/ta_model/ $MODEL_PATH
 COPY app/ $APP_PATH
-COPY main.py tastack_deploy.pkl tatransformer.pkl settings.yml $PROJECT_PATH/
+COPY main.py tastack_deploy.pkl tatransformer.pkl logreg.pkl settings.yml $PROJECT_PATH/
 RUN useradd -ms /bin/bash modelserver &&  \
     chown -R modelserver $PROJECT_PATH
 USER modelserver

@@ -1,12 +1,12 @@
 transformer_path: 'tatransformer.pkl'
 model_paths:
-  logreg: 'talogreg.pkl'
+  logreg: 'logreg.pkl'
   stacking: 'tastack_deploy.pkl'
 log_config:
   version: 1
   formatters:
     basic:
-      format: '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+      format: '%(asctime)s:%(name)s:%(levelname)s --- %(message)s'
       datefmt: '%d-%b-%y %H:%M:%S'
   handlers:
     console:
@@ -26,4 +26,4 @@ log_config:
   root:
     level: INFO
     handlers: [console]
-  disable_existing_loggers: no
+  disable_existing_loggers: yes

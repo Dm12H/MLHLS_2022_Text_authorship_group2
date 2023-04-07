@@ -1,10 +1,11 @@
 from fastapi import Depends, Form
 from typing import Any, Annotated
-from ..config import SettingsDep
+from ..config import get_settings
+from ..logs import log_model_load, log_transformer_load
 import pickle
 import logging
-from threading import Lock
 from text_authorship.ta_model.stacking import TASTack2Deploy
+from text_authorship.ta_model.logreg import LogregModel
 from text_authorship.ta_model.data_preparation import TATransformer
 
 
@@ -14,34 +15,44 @@ logger = logging.getLogger(__name__)
 class ModelHolder:
     __models: dict[str, Any] = dict()
     __transformer: Any = None
-    __lock: Lock = Lock()
 
     @classmethod
-    def get_model(cls, name: str, pkl_path: str):
-        with cls.__lock:
-            if name not in cls.__models:
-                logger.info(f'loading model {name} from {pkl_path}')
-                cls.__models[name] = pickle.load(open(pkl_path, 'rb'))
-                logger.info(f'model {name} loaded')
+    def load_model(cls, name: str, pkl_path: str):
+        if name in cls.__models:
+            return
+        with log_model_load(logger, name=name, path=pkl_path):
+            cls.__models[name] = pickle.load(open(pkl_path, 'rb'))
+
+    @classmethod
+    def load_transformer(cls, pkl_path: str):
+        if cls.__transformer:
+            return
+        with log_transformer_load(logger, pkl_path):
+            cls.__transformer = pickle.load(open(pkl_path, 'rb'))
+
+    @classmethod
+    def load_from_settings(cls):
+        settings = get_settings()
+        for name, path in settings.model_paths.items():
+            cls.load_model(name, path)
+        cls.load_transformer(settings.transformer_path)
+
+    @classmethod
+    def get_model(cls, name: str):
         return cls.__models[name]
     
     @classmethod
-    def get_transformer(cls, pkl_path: str):
-        with cls.__lock:
-            if cls.__transformer is None:
-                logger.info(f'loading transformer from {pkl_path}')
-                cls.__transformer = pickle.load(open(pkl_path, 'rb'))
-                logger.info(f'transformer loaded')
+    def get_transformer(cls):
         return cls.__transformer
 
 
-async def get_model(model: Annotated[str, Form()], settings: SettingsDep) -> Any:
-    model = ModelHolder.get_model(model, settings.model_paths[model])
+async def get_model(model: Annotated[str, Form()]) -> Any:
+    model = ModelHolder.get_model(model)
     return model
 
 
-async def get_transformer(settings: SettingsDep) -> Any:
-    transformer = ModelHolder.get_transformer(settings.transformer_path)
+async def get_transformer() -> Any:
+    transformer = ModelHolder.get_transformer()
     return transformer
 
 
