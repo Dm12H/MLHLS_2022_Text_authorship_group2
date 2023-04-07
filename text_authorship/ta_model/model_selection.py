@@ -2,7 +2,7 @@ import numpy as np
 import optuna
 import pandas as pd
 from .data_preparation import get_author_vectorizer
-from .data_preparation import FeatureBuilder
+from text_authorship.ta_model import FeatureBuilder
 from .data_preparation import get_encoder
 from sklearn.metrics import f1_score
 
