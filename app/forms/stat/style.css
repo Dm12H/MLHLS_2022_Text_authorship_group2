@@ -6,8 +6,8 @@ color: green;
 }
 
 button {
-    background-color:#eee;
-    color: #444;
+    background-color:#777;
+    color: white;
     border:none;
     border-radius:10px;
     margin: 15px;
@@ -15,7 +15,7 @@ button {
 }
 
 button:hover {
-    background-color: #ccc;
+    background-color: #555;
 }
 
 .form_button{

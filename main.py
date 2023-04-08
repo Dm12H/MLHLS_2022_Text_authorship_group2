@@ -64,7 +64,7 @@ async def root(request: Request):
                                        "models": get_model_names()})
 
 
-@app.post("/upload_text/")
+@app.post("/upload_text/", response_class=HTMLResponse)
 async def upload_text(request: Request,
                       x_request_id: Annotated[UUID, Header()],
                       model: ModelDep, 
@@ -72,9 +72,10 @@ async def upload_text(request: Request,
                       text: Annotated[str, Form(max_length=5000)]):
     
     probabilities = predict_text(id=x_request_id,
-                               model=model,
-                               transformer=transformer,
-                               text=text)
+                                 model=model,
+                                 transformer=transformer,
+                                 text=text)
+    probabilities = probabilities.sort_values(ascending=False)
     author_name = select_best_pred(probabilities)
     predictions = {author: val
                    for author, val
