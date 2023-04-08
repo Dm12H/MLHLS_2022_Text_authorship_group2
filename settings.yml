@@ -1,6 +1,7 @@
 transformer_path: tatransformer.pkl
 model_paths:
   logreg: logreg.pkl
+  stacking: tastack_deploy.pkl
 log_config:
   version: 1
   formatters:
