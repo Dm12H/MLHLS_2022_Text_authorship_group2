@@ -1,7 +1,7 @@
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
-from text_authorship.ta_model import train_test_split, get_encoders
 from text_authorship.ta_model.logreg import LogregModel
+from text_authorship.ta_model.model_selection import train_test_split
 from text_authorship.ta_model.data_preparation import get_encoder
 from text_authorship.ta_model.stacking import TAStack2, TAVectorizer, TASTack2Deploy
 from xgboost import XGBClassifier
@@ -17,7 +17,7 @@ def train_test_logreg(df):
 
 
 def train_logreg(df, target_col="author"):
-    y_labels = df.pop(target_col)
+    y_labels = df[target_col]
     clf = LogregModel()
     clf.fit(df, y_labels)
     return clf

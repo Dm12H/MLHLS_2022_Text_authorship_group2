@@ -45,7 +45,8 @@ class LogregModel:
                                       random_state=random_state,
                                       C=C,
                                       class_weight=class_weight,
-                                      max_iter=max_iter)
+                                      max_iter=max_iter,
+                                      verbose=True)
 
     def fit(self, X, y):
         vecs = dict()

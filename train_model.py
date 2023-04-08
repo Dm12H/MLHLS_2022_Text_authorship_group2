@@ -1,7 +1,7 @@
 if __name__ == "__main__":
     import argparse
     import pickle
-    from text_authorship.ta_model import load_df
+    from text_authorship.ta_model.data_preparation import load_df
     from text_authorship.ta_model.base_models import train_logreg, train_stacking
 
     argparser = argparse.ArgumentParser()
@@ -25,9 +25,9 @@ if __name__ == "__main__":
         train_func = train_stacking
     else:
         raise ValueError("valid model options are 'logreg' and 'stacking' ")
-    
+    print(f"STARTED TRAINING {model_name}")
     model = train_func(df)
-    
+    print("TRAINING FINISHED, SAVING MODEL")
     if args.pickle:
         with open(args.pickle, 'wb') as f:
             pickle.dump(model, f, protocol=pickle.HIGHEST_PROTOCOL)

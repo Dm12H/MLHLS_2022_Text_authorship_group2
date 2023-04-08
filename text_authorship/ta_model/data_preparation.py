@@ -435,7 +435,7 @@ class Featurebuilder:
             return features[idx - start]
 
 
-def load_df(path, load_stats=True, count_features=True):
+def load_df(path, load_stats=False, count_features=False):
     """
     загружает датасет с нужными полями для работы
     """
