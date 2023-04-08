@@ -24,6 +24,17 @@
     * `stacking` содержит инструменты для энсэмблинга
     * `logreg` содержит инструменты для логистической регрессии
 
+## Запуск проекта
+Для запуска неободимо скачать подготовленный [датасет](https://drive.google.com/drive/folders/1S7ZPEsi2yiW5C7TP-1ICO1pZJp0YUXQ9?usp=share_link)\
+установка зависимостей:\
+`pip install -r requirements.txt`
+скрипт для подготовки датасета и сериализации трансформера:\
+`./prepare_dataset.py --data_dir=<path-to-raw-data-folder> --output_dir=<path-to-output-folder> --pickle=<file-to-serialize-transformer>`\
+скрипт для получения скора модели на тестовой выборке:\
+`./train_test_model.py --prepared_data=<path-to-transformed-dataset> --model=<logreg|stacking>`\
+скрипт для обучения и сериализации модели:\
+`./train_model.py --prepared_data=<path-to-transformed-dataset> --model=<logreg|stacking> --pickle=<file-to-serialize-model>`
+
 ## Структура сервиса
 
 - Файл `main.py` содержит основной файл для запуска сервиса на `fastapi`
