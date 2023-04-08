@@ -72,9 +72,9 @@ class LogregModel:
             return instance
 
     def predict(self, df):
-        probs_df = self.predict_proba(df)
-        name = probs_df.idxmax(axis=1)[0]
-        return name
+        probs_df = self.predict_proba(df).iloc[0]
+        best_idx = probs_df.argmax()
+        return self.probs_df[best_idx]
 
     def predict_proba(self, df) -> pd.DataFrame:
         if not self._fitted:

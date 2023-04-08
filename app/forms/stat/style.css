@@ -6,12 +6,16 @@ color: green;
 }
 
 button {
-    background-color:#0a0a23;
-    color: #fff;
+    background-color:#eee;
+    color: #444;
     border:none;
     border-radius:10px;
     margin: 15px;
     height: 30px;
+}
+
+button:hover {
+    background-color: #ccc;
 }
 
 .form_button{
@@ -24,3 +28,12 @@ button {
     max-width: 100px;
   }
 
+td {
+    padding-right: 50px;
+}
+
+#predictions {
+  padding: 0 18px;
+  display: none;
+  overflow: hidden;
+}

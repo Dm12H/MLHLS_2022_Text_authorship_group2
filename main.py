@@ -7,7 +7,7 @@ from starlette.types import Scope, Receive, Send
 from app.logs import log_request, log_server_startup, set_logs
 from app.config import get_model_names
 from app.app_models.model_manager import ModelDep, TransformDep, ModelHolder
-from app.app_models.inference import predict_text
+from app.app_models.inference import predict_text, select_best_pred
 
 import logging
 import logging.config
@@ -71,10 +71,15 @@ async def upload_text(request: Request,
                       transformer: TransformDep,
                       text: Annotated[str, Form(max_length=5000)]):
     
-    predicted_author = predict_text(id=x_request_id,
-                                    model=model,
-                                    transformer=transformer,
-                                    text=text)
+    probabilities = predict_text(id=x_request_id,
+                               model=model,
+                               transformer=transformer,
+                               text=text)
+    author_name = select_best_pred(probabilities)
+    predictions = {author: val
+                   for author, val
+                   in zip(probabilities.index, probabilities)}
     return templates.TemplateResponse("prediction.html",
                                       {"request": request,
-                                       "author_name": predicted_author})
+                                       "author_name": author_name,
+                                       "predictions": predictions})

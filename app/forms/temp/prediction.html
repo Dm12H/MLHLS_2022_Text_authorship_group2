@@ -9,8 +9,35 @@
 <div class="wrapper">
     <h2> Most similar author is: </h2>
     <a> {{author_name}}  </a>
-    <button class="return_button" onclick="history.back()"> Return </button>
+    <div>
+        <button class="return_button" onclick="history.back()"> Return </button>
+        <button id="collapse_button" class="collapsible">
+            Show probabilities
+        </button>
+    </div>
+    <div id="predictions">
+        <table>
+            {% for author in predictions %}
+            <TR>
+                <TD class="table_col">{{author}}</TD>
+                <TD class="table_col">
+                    {{"%.3f" | format(predictions[author])}}
+                </TD>
+            </TR>
+            {% endfor %}
+        </table>
+    </div>
 </div>
-
+<script>
+    var collapsible = document.getElementById("collapse_button");
+    collapsible.addEventListener("click", function() {
+        var content = document.getElementById("predictions");
+        if (content.style.display === "block") {
+            content.style.display = "none";
+        } else {
+            content.style.display = "block";
+        }
+    });
+</script>
 </body>
 </html>
