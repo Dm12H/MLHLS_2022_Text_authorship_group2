@@ -1,6 +1,11 @@
 h3 {
 color: green;
 }
+
+form {
+    display: grid;
+}
+
 .wrapper {
     display: grid;
 }
@@ -37,4 +42,9 @@ td {
     padding: 0 18px;
     display: none;
     overflow: hidden;
+}
+
+#text_input {
+    width: 30%;
+    min-width: 500px;
 }

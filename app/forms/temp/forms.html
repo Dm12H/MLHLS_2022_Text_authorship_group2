@@ -1,19 +1,21 @@
 <html xmlns="http://www.w3.org/1999/html">
     <head>
         <title> Load text page</title>
-        <link rel="stylesheet" href=" {{ url_for('stat',path='style.css')}}">
+        <link rel="stylesheet" href="../stat/style.css">
     </head>
     <style>
         position: relative
     </style>
     <body>
         <form action="/upload_text/" method="post" enctype="multipart/form-data" id="taform">
-         <h3> Insert text: <br> </h3>
-        <input type="text" name="text"  id="user" size="100" maxlength="5000"> <br>
-        <button class="form_button" type="sumbit"> load text  <br> </button>
-        <button  class="form_button" type="reset"> reset text  <br> </button>
+            <h3> Enter text:</h3>
+            <label for="text_input"></label>
+            <textarea id="text_input" name="text" maxlength="5000" rows="20"></textarea>
+            <div class="buttons_container">
+                <button class="form_button" type="sumbit"> load text  </button>
+                <button  class="form_button" type="reset"> reset text </button>
+            </div>
         </form>
-
         <label for="model">Choose model:</label>
         <select name="model" id="model" form="taform">
             {% for name in models %}
