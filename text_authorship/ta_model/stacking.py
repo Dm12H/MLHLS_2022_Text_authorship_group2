@@ -138,6 +138,12 @@ class TAStack2(ClassifierMixin, BaseEstimator):
 
         return self.model_.predict(X)
     
+    def predict_proba(self, X):
+        if not self.vectorized_input:
+            X = self.vectorizer.transform(X)
+
+        return self.model_.predict_proba(X)
+    
 
 class TASTack2Deploy(TAStack2):
     def __init__(self, vectorizer=None, base_estimator=None, final_estimator=None, vectorized_input=False, cv=None, dict_sizes=None):
@@ -156,6 +162,12 @@ class TASTack2Deploy(TAStack2):
     
     def predict(self, X):
         return self.encoder_.inverse_transform(super().predict(X))
+    
+    def predict_proba(self, X):
+        probs = super().predict_proba(X)
+        labels = self.encoder_.classes_
+        probs = pd.DataFrame(probs, columns=labels)
+        return probs
     
 
 class TAStack(ClassifierMixin, BaseEstimator):
