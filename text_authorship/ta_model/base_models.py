@@ -1,5 +1,5 @@
 import pandas as pd
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, Tuple
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from xgboost import XGBClassifier
@@ -33,7 +33,8 @@ _LOGREG_PARAMS = {
 
 def train_logreg(df: pd.DataFrame,
                  feature_params: Optional[Dict[str, Any]] = None,
-                 logreg_params: Optional [Dict[str, Any]] = None):
+                 logreg_params: Optional [Dict[str, Any]] = None
+                 ) -> Tuple[LogisticRegression, float]:
 
     df_train, df_test, y_train, y_test = train_test_split(df, share=0.7)
     if feature_params is None:
@@ -60,7 +61,8 @@ def train_logreg(df: pd.DataFrame,
 
 
 def train_stacking(df: pd.DataFrame,
-                   logreg_params: Optional[Dict[str, Any]] = None):
+                   logreg_params: Optional[Dict[str, Any]] = None
+                   ) -> Tuple[TAStack2, float]:
     x_train, x_test, y_train, y_test = train_test_split(df)
     encoder = get_encoder(x_train)
     y_train, y_test = encoder.transform(y_train), encoder.transform(y_test)

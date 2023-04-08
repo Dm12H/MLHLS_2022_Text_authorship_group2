@@ -1,5 +1,6 @@
 import nltk
 import pandas as pd
+from typing import Any, List
 from nltk.corpus import stopwords
 from pymorphy2 import MorphAnalyzer
 from sklearn.base import BaseEstimator, TransformerMixin
@@ -13,15 +14,16 @@ class TATransformer(BaseEstimator, TransformerMixin):
 
     _parsers = []
 
-    def __init__(self,
-                 use_stopwords=True,
-                 save_path='transformed_df.csv',
-                 load_path=None):
+    def __init__(
+            self,
+            use_stopwords: bool = True,
+            save_path: str = 'transformed_df.csv',
+            load_path: bool = None):
         self.use_stopwords = use_stopwords
         self.save_path = save_path
         self.load_path = load_path
 
-    def fit(self, X: pd.DataFrame, y=None):
+    def fit(self, X: pd.DataFrame, y: Any = None):
         self.morph_ = MorphAnalyzer()
         self.stopwords_ = set()
         self.new_cols_ = ParseManager.get_col_names()
@@ -32,7 +34,7 @@ class TATransformer(BaseEstimator, TransformerMixin):
 
         return self
 
-    def transform(self, X: pd.DataFrame):
+    def transform(self, X: pd.DataFrame) -> pd.DataFrame:
         if self.load_path and self.load_path.endswith('.csv'):
             X = pd.read_csv(self.load_path)
         else:
@@ -56,5 +58,5 @@ class TATransformer(BaseEstimator, TransformerMixin):
 
         return X
 
-    def parse_text(self, text: str):
+    def parse_text(self, text: str) -> List[str]:
         return ParseManager.parse_text(self.morph_, self.stopwords_, text)

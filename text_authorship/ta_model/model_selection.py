@@ -1,12 +1,17 @@
 import numpy as np
 import pandas as pd
+from typing import Tuple, Any, Sequence, Optional, Dict, List
 from vectorizers import get_author_vectorizer
 from featurebuilder import FeatureBuilder
 from data_preparation import get_encoder
 from sklearn.metrics import f1_score
+from sklearn.preprocessing import LabelEncoder
 
 
-def select_sample(dataframe, size=0.1):
+def select_sample(
+        dataframe: pd.DataFrame,
+        size: float = 0.1
+        ) -> pd.DataFrame:
     """
     сэмпл датасета, сбалансированный на вероятности классов
     :param dataframe: датафрейм для анализа
@@ -19,9 +24,12 @@ def select_sample(dataframe, size=0.1):
     return dataframe.iloc[idx]
 
 
-def _split_books_to_target(books, target):
+def _split_books_to_target(
+        books: pd.DataFrame,
+        target: float = 0.5
+        ) -> Tuple[int, int, int]:
     label_train_count = 0
-    label_total_count = np.sum(books["counts"])
+    label_total_count = int(np.sum(books["counts"]))
     i = 0
     for _, row in books.iloc[:-1].iterrows():
         num_segments = row.counts
@@ -39,7 +47,12 @@ def _split_books_to_target(books, target):
     return i, label_train_count, label_total_count
 
 
-def _shuffle_books(df, author, random_gen, cross_val=True):
+def _shuffle_books(
+        df: pd.DataFrame,
+        author: str,
+        random_gen: np.random.Generator,
+        cross_val: bool = True
+        ) -> pd.DataFrame:
     df_slice = df[df.author == author][["book", "counts"]]
     unique_books = df_slice.drop_duplicates("book")
     if len(unique_books) < 2 and not cross_val:
@@ -49,7 +62,12 @@ def _shuffle_books(df, author, random_gen, cross_val=True):
     return shuffled_books
 
 
-def train_test_split(df, share=0.5, seed=10, cross_val=False):
+def train_test_split(
+        df: pd.DataFrame,
+        share: float = 0.5,
+        seed: int = 10,
+        cross_val: bool = False
+        ) -> Tuple[pd.DataFrame, pd.DataFrame, pd.Series, pd.Series]:
     """
         разделяет данные на обучающую и тестовую выборки по книгам
     :param df: датафрейм для анализа
@@ -93,12 +111,13 @@ def train_test_split(df, share=0.5, seed=10, cross_val=False):
 
 
 def train_crossval_twofold(
-        frame,
-        clf,
-        *args,
-        split=0.5,
-        vectorizer_dict=None,
-        avg="micro"):
+        frame: pd.DataFrame,
+        clf: Any,
+        *args: Sequence[str | Sequence[str]],
+        split: float = 0.5,
+        vectorizer_dict: Optional[Dict[str, Any]] = None,
+        avg: str = "micro"
+        ) -> List[float]:
     """
     функция, обучающая классификатор на двухфолдовой кроссвалидации
     :param frame: Dataframe с данными
@@ -139,11 +158,16 @@ def train_crossval_twofold(
 
         clf.fit(x_train, y_train)
         score = f1_score(clf.predict(x_test), y_test, average=avg)
-        scores.append(score)
+        scores.append(float(score))
     return scores
 
 
-def get_encoders(df, x, arg_list, vectorizer_params):
+def get_encoders(
+        df: pd.DataFrame,
+        x: pd.DataFrame,
+        arg_list: Sequence[str, Sequence[str]],
+        vectorizer_params: Dict[str, Any]
+        ) -> Tuple[FeatureBuilder, LabelEncoder]:
     if vectorizer_params is None:
         raise ValueError("not using any vectorizer!")
     vecs = dict()
@@ -157,7 +181,11 @@ def get_encoders(df, x, arg_list, vectorizer_params):
     return data_encoder, label_encoder
 
 
-def books_cross_val(df, k=5, seed=10):
+def books_cross_val(
+        df: pd.DataFrame,
+        k: int = 5,
+        seed: int = 10
+        ) -> Tuple[pd.Index, pd.Index]:
     df_remain = df
     while k > 0:
         if k == 1:
@@ -176,7 +204,12 @@ def books_cross_val(df, k=5, seed=10):
         k -= 1
 
 
-def get_top_features(label_enc, data_enc, clf, n):
+def get_top_features(
+        label_enc: LabelEncoder,
+        data_enc: FeatureBuilder,
+        clf: Any,
+        n: int
+        ) -> pd.DataFrame:
     names = label_enc.classes_
     coeffs = clf.coef_
     author_dict = dict()

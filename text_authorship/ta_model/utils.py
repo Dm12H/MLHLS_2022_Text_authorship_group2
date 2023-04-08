@@ -1,6 +1,6 @@
 import os
 from argparse import ArgumentParser, Namespace
-from typing import Sequence
+from typing import Sequence, Set
 
 
 class DatasetArgumentParser(ArgumentParser):
@@ -37,7 +37,7 @@ class TrainingArgumentParser(ArgumentParser):
         return args
 
 
-def _strip_str(s: str, chars):
+def _strip_str(s: str, chars: Set[str]) -> str:
     i, j = 0, len(s)
 
     while i < j and s[i] in chars:

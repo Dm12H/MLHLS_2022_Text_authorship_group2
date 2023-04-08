@@ -13,7 +13,8 @@ import pandas as pd
 @lru_cache(maxsize=1)
 def get_books(
         writer: str,
-        writers_dir: str) -> Dict[str, List[str]]:
+        writers_dir: str
+        ) -> Dict[str, List[str]]:
     book_list = os.listdir(os.path.join(writers_dir, writer))
     full_book_path = partial(os.path.join, writers_dir, writer)
     books = {}
@@ -34,7 +35,8 @@ def get_books(
 def get_data_for_df(
         writer: str,
         writers_dir: str,
-        symbol_lim: int = 3000) -> List[Tuple[str, str]]:
+        symbol_lim: int = 3000
+        ) -> List[Tuple[str, str]]:
     books = get_books(writer, writers_dir)
     data = []
     for book, paras in books.items():
@@ -53,7 +55,8 @@ def get_data_for_df(
 @lru_cache(maxsize=1)
 def extract_df(
         writers_dir: str,
-        symbol_lim: int = 3000) -> pd.DataFrame:
+        symbol_lim: int = 3000
+        ) -> pd.DataFrame:
     pre_df = []
     for writer in os.listdir(writers_dir):
         for book, text in get_data_for_df(writer=writer,
@@ -71,7 +74,8 @@ def extract_df(
 def load_df(
         path: str,
         load_stats: bool = True,
-        count_features: bool = True) -> pd.DataFrame:
+        count_features: bool = True
+        ) -> pd.DataFrame:
     """
     загружает датасет с нужными полями для работы
     """

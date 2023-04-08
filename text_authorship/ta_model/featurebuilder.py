@@ -1,8 +1,11 @@
 from itertools import chain
 
 import numpy as np
+import pandas as pd
 import scipy as sp
 
+from typing import List, Dict, Sequence, Tuple, Any, Optional
+from sklearn.feature_extraction.text import CountVectorizer
 from data_preparation import check_seq
 
 
@@ -12,7 +15,9 @@ class FeatureBuilder:
                        "lemmas": "vectorizer",
                        "tags": "vectorizer"}
 
-    def __init__(self, *args, **vectorizers):
+    def __init__(self,
+                 *args: Tuple[str | Sequence[str]],
+                 **vectorizers: Dict[str, CountVectorizer]):
         vectorizers = {k.lstrip("vec_"): v for k, v in vectorizers.items()}
         featurelist = self.pack_features(args)
         self.vectorizers = {}
@@ -38,19 +43,31 @@ class FeatureBuilder:
         self.feature_idx = None
 
     @staticmethod
-    def pack_features(features):
+    def pack_features(
+            features: Sequence[str | Sequence]
+            ) -> List[str]:
         attrs = (ft if check_seq(ft) else (ft,) for ft in features)
         return list(chain(*attrs))
 
     @staticmethod
-    def get_last_occurence(seq, val):
+    def get_last_occurence(
+            seq: Sequence,
+            val: Any
+            ) -> int:
         return len(seq) - 1 - seq[::-1].index(val)
 
     @staticmethod
-    def get_first_occurence(seq, val):
+    def get_first_occurence(
+            seq: Sequence,
+            val: Any
+            ) -> int:
         return seq.index(val)
 
-    def _group_transform_features(self, df,  processor):
+    def _group_transform_features(
+            self,
+            df: pd.DataFrame,
+            processor: Optional[CountVectorizer]
+            ) -> Tuple[List[np.ndarray], List[int]]:
         first_idx = self.get_first_occurence(self.ordered_proc, processor)
         last_idx = self.get_last_occurence(self.ordered_proc, processor)
         feature_slice = self.ordered_ft[first_idx:last_idx + 1]
@@ -59,7 +76,10 @@ class FeatureBuilder:
                                                    featurelist=feature_slice)
         return feature_mat, positions
 
-    def fit_transform(self, df):
+    def fit_transform(
+            self,
+            df: pd.DataFrame
+            ) -> np.array:
         feature_positions = []
         feature_matrices = []
         for proc in set(self.ordered_proc):
@@ -75,7 +95,10 @@ class FeatureBuilder:
         self._initialized = True
         return final_matrix
 
-    def transform(self, df):
+    def transform(
+            self,
+            df: pd.DataFrame
+            ) -> np.array:
         feature_matrices = []
         for proc in set(self.ordered_proc):
             featuremat, positions = self._group_transform_features(df, proc)
@@ -83,7 +106,12 @@ class FeatureBuilder:
         final_matrix = sp.sparse.hstack(feature_matrices)
         return final_matrix
 
-    def bulk_process(self, df, proc, featurelist):
+    def bulk_process(
+            self,
+            df: pd.DataFrame,
+            proc: Optional[CountVectorizer],
+            featurelist: Sequence[str]
+            ) -> Tuple[List[np.array], List[int]]:
         if proc is None:
             columns = df[featurelist].to_numpy(dtype=np.float64)
             mat = [sp.sparse.csr_matrix(columns)]
@@ -101,7 +129,10 @@ class FeatureBuilder:
                 indices.append(mat.shape[1])
             return matrices, indices
 
-    def find_idx(self, idx):
+    def find_idx(
+            self,
+            idx: int
+            ) -> int:
         for key, (start, length) in self.feature_idx.items():
             if start <= idx < (start + length):
                 break
