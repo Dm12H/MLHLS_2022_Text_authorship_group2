@@ -1,6 +1,7 @@
 import pickle
 from operator import itemgetter
 
+import pandas as pd
 from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -71,9 +72,15 @@ class LogregModel:
             return instance
 
     def predict(self, df):
+        probs_df = self.predict_proba(df)
+        name = probs_df.idxmax(axis=1)[0]
+        return name
+
+    def predict_proba(self, df) -> pd.DataFrame:
         if not self._fitted:
             raise ValueError("cannot run predict on non-trained model")
         data = self._data_encoder.transform(df)
-        prediction = self.clf.predict(data)
+        probs = self.clf.predict_proba(data)
         labels = self._label_encoder.classes_
-        return labels[prediction]
+        output = pd.DataFrame(probs, columns=labels)
+        return output
