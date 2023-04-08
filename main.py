@@ -8,6 +8,7 @@ from app.logs import log_request, log_server_startup, set_logs
 from app.config import get_model_names
 from app.app_models.model_manager import ModelDep, TransformDep, ModelHolder
 from app.app_models.inference import predict_text, select_best_pred
+from app.utils.visualization import draw_barplot
 
 import logging
 import logging.config
@@ -75,12 +76,9 @@ async def upload_text(request: Request,
                                  model=model,
                                  transformer=transformer,
                                  text=text)
-    probabilities = probabilities.sort_values(ascending=False)
+    fig = draw_barplot(probabilities)
     author_name = select_best_pred(probabilities)
-    predictions = {author: val
-                   for author, val
-                   in zip(probabilities.index, probabilities)}
     return templates.TemplateResponse("prediction.html",
                                       {"request": request,
                                        "author_name": author_name,
-                                       "predictions": predictions})
+                                       "barplot": fig})

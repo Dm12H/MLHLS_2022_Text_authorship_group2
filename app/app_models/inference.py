@@ -14,9 +14,10 @@ def predict_text(id: UUID, model: Any, transformer: Any, text: str):
         text_transformed: pd.DataFrame = transformer.transform(text_df)
     with log_evaluating(logger, id):
         predictions: pd.DataFrame = model.predict_proba(text_transformed)
-    return predictions.iloc[0]
+    return predictions
 
 
-def select_best_pred(probs_df: pd.Series):
-    idx = probs_df.argmax()
-    return probs_df.index[idx]
+def select_best_pred(probs_df: pd.DataFrame):
+    single_line = probs_df.iloc[0]
+    idx = single_line.argmax()
+    return single_line.index[idx]

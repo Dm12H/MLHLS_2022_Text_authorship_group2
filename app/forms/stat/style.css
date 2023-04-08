@@ -33,7 +33,8 @@ td {
 }
 
 #predictions {
-  padding: 0 18px;
-  display: none;
-  overflow: hidden;
+    max-width: 50%;
+    padding: 0 18px;
+    display: none;
+    overflow: hidden;
 }

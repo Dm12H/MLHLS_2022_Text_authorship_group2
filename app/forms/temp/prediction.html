@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="../stat/style.css">
     <meta charset="UTF-8">
     <title>Prediction results</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
 <div class="wrapper">
@@ -15,19 +16,7 @@
             Show probabilities
         </button>
     </div>
-    <div id="predictions">
-        <table>
-            {% for author in predictions %}
-            <TR>
-                <TD class="table_col">{{author}}</TD>
-                <TD class="table_col">
-                    {{"%.3f" | format(predictions[author])}}
-                </TD>
-            </TR>
-            {% endfor %}
-        </table>
-    </div>
-</div>
+    <div id="predictions"></div>
 <script>
     var collapsible = document.getElementById("collapse_button");
     collapsible.addEventListener("click", function() {
@@ -38,6 +27,15 @@
             content.style.display = "block";
         }
     });
+</script>
+<script>
+    var plotly_data = {{barplot | safe}};
+    var graphdiv = document.getElementById("predictions");
+    Plotly.newPlot(
+        graphdiv,
+        plotly_data.data,
+        plotly_data.layout,
+        {staticPlot: true});
 </script>
 </body>
 </html>
