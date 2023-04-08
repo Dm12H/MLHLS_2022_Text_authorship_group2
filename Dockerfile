@@ -3,7 +3,7 @@ ENV PROJECT_PATH="/ta_project"
 ENV VENV_PATH=$PROJECT_PATH/venv \
     MODEL_PATH=$PROJECT_PATH/text_authorship/ta_model \
     APP_PATH=$PROJECT_PATH/app
-RUN mkdir -p $APP_PATH && mkdir -p $MODEL_PATH
+RUN mkdir -p $APP_PATH && mkdir -p $MODEL_PATH && touch $PROJECT_PATH/logerrors.log
 COPY text_authorship/ta_model/ $MODEL_PATH
 COPY app/ $APP_PATH
 COPY main.py tastack_deploy.pkl tatransformer.pkl logreg.pkl settings.yml $PROJECT_PATH/
@@ -12,8 +12,8 @@ RUN useradd -ms /bin/bash modelserver &&  \
 USER modelserver
 RUN python3 -m venv $VENV_PATH
 ENV PATH="$VENV_PATH/bin:$PATH"
-RUN python3 -m pip install --no-cache-dir --upgrade pip && \
-    python3 -m pip install --no-cache-dir -r $MODEL_PATH/requirements.txt && \
-    python3 -m pip install --no-cache-dir fastapi[all] -U
+RUN python3 -m pip install --no-cache-dir --upgrade pip
+RUN python3 -m pip install --no-cache-dir -r $MODEL_PATH/requirements.txt
+RUN python3 -m pip install --no-cache-dir fastapi[all] plotly -U
 WORKDIR $PROJECT_PATH
 CMD uvicorn --host 0.0.0.0 --port 8898 main:app
