@@ -19,6 +19,15 @@ button {
     height: 30px;
 }
 
+select {
+    background-color:#777;
+    color: white;
+    border:none;
+    border-radius:10px;
+    padding: 5px 10px;
+    max-width: 200px;
+}
+
 button:hover {
     background-color: #555;
 }
