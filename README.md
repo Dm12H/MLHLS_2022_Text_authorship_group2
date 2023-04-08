@@ -29,9 +29,9 @@
 установка зависимостей:\
 `pip install -r requirements.txt`
 скрипт для подготовки датасета и сериализации трансформера:\
-`./prepare_dataset.py --data_dir=<path-to-raw-data-folder> --output_dir=<path-to-output-folder> --pickle=<file-to-serialize-transformer>`
+`./prepare_dataset.py --data_dir=<path-to-raw-data-folder> --output_dir=<path-to-output-folder> --pickle=<file-to-serialize-transformer>`\
 скрипт для получения скора модели на тестовой выборке:\
-`./train_test_model.py --prepared_data=<path-to-transformed-dataset> --model=<logreg|stacking>`
+`./train_test_model.py --prepared_data=<path-to-transformed-dataset> --model=<logreg|stacking>`\
 скрипт для обучения и сериализации модели:\
 `./train_model.py --prepared_data=<path-to-transformed-dataset> --model=<logreg|stacking> --pickle=<file-to-serialize-model>`
 
@@ -53,10 +53,9 @@
 
 При запуске сервиса на локальной машине (не из docker образа) нужно загрузить [архив](https://drive.google.com/drive/folders/1w05x8hz_RO8Pn_oDCySCi0soXTbj9nm2?usp=sharing) и распаковать лежащие внутри `.pkl` файлы в корневую директорию проекта\
 установка зависимостей:\
-`pip install -r requirements.txt`
+`pip install -r requirements.txt`\
 запуск сервиса:\
-`uvicorn main:app` (при желании можно указать конкретный порт)
-
+`uvicorn main:app` (при желании можно указать конкретный порт)\
 после появления в консоли лога вида `server started after <time-spent>` можно открыть сервис в браузере (по умолчанию `localhost:8000`)
 
 ### Функционал
