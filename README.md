@@ -24,7 +24,7 @@
     * `stacking` содержит инструменты для энсэмблинга
     * `logreg` содержит инструменты для логистической регрессии
 
-## Запуск проекта
+## Подготовка датасета и моделей
 Для запуска неободимо скачать подготовленный [датасет](https://drive.google.com/drive/folders/1S7ZPEsi2yiW5C7TP-1ICO1pZJp0YUXQ9?usp=share_link)\
 установка зависимостей:\
 `pip install -r requirements.txt`
