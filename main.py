@@ -65,12 +65,16 @@ async def root(request: Request):
 
 
 @app.post("/upload_text/")
-async def upload_text(x_request_id: Annotated[UUID, Header()], 
+async def upload_text(request: Request,
+                      x_request_id: Annotated[UUID, Header()],
                       model: ModelDep, 
                       transformer: TransformDep,
                       text: Annotated[str, Form(max_length=5000)]):
     
-    return predict_text(id=x_request_id, 
-                        model=model,
-                        transformer=transformer,
-                        text=text)
+    predicted_author = predict_text(id=x_request_id,
+                                    model=model,
+                                    transformer=transformer,
+                                    text=text)
+    return templates.TemplateResponse("prediction.html",
+                                      {"request": request,
+                                       "author_name": predicted_author})

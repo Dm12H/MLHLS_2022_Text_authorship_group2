@@ -1,3 +1,26 @@
 h3 {
 color: green;
 }
+.wrapper {
+    display: grid;
+}
+
+button {
+    background-color:#0a0a23;
+    color: #fff;
+    border:none;
+    border-radius:10px;
+    margin: 15px;
+    height: 30px;
+}
+
+.form_button{
+    min-width: 100px;
+    max-width: 200px;
+}
+
+.return_button {
+    min-width: 50px;
+    max-width: 100px;
+  }
+
