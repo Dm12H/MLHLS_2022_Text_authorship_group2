@@ -1,7 +1,7 @@
-transformer_path: 'tatransformer.pkl'
+transformer_path: tatransformer.pkl
 model_paths:
-  logreg: 'logreg.pkl'
-  stacking: 'tastack_deploy.pkl'
+  logreg: logreg.pkl
+  stacking: tastack_deploy.pkl
 log_config:
   version: 1
   formatters:
@@ -14,16 +14,17 @@ log_config:
       formatter: basic
       level: INFO
       stream: ext://sys.stdout
+    errorHandler:
+      class: logging.FileHandler
+      formatter: basic
+      level: ERROR
+      filename: logerrors.log
   loggers:
     app.app_models.model_manager:
       level: INFO
-      handlers: [console]
-      propagate: no
     app.app_models.inference:
       level: INFO
-      handlers: [console]
-      propagate: no
   root:
     level: INFO
-    handlers: [console]
+    handlers: [console, errorHandler]
   disable_existing_loggers: yes
