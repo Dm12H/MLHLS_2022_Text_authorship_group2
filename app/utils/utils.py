@@ -1,7 +1,8 @@
 from app.app_models.inference import select_best_pred
+import pandas as pd
 
 
-def get_sorted_predictions(df):
+def get_sorted_predictions(df: pd.DataFrame):
     single_row = df.iloc[0]
     probabilities = single_row.sort_values(ascending=False)
     predictions = {author: val

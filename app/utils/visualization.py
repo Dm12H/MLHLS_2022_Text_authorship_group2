@@ -4,7 +4,7 @@ import plotly.express as px
 from plotly.utils import PlotlyJSONEncoder
 
 
-def draw_barplot(df):
+def draw_barplot(df: pd.DataFrame) -> str:
     dataframe = df.T.set_axis(["probs"], axis=1)
     dataframe.sort_values(by="probs", ascending=True, inplace=True)
     fig = px.bar(dataframe, x="probs", color="probs", orientation='h',
