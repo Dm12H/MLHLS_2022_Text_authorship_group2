@@ -1,7 +1,7 @@
 from sklearn.pipeline import Pipeline
 from sklearn.linear_model import LogisticRegression
 
-from stacking.multitfidf import MultiTfidf
+from vectorizers.multitfidf import MultiTfidf
 from stacking.tastack import TAStack
 
 from itertools import combinations

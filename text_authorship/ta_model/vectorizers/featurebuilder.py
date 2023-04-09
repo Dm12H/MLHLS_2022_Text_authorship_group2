@@ -6,7 +6,8 @@ import scipy as sp
 
 from typing import List, Dict, Sequence, Tuple, Any, Optional, Union
 from sklearn.feature_extraction.text import CountVectorizer
-from data_preparation import check_seq
+from data_preparation.features import check_seq
+from scipy.sparse import csr_array
 
 
 class FeatureBuilder:
@@ -67,7 +68,7 @@ class FeatureBuilder:
             self,
             df: pd.DataFrame,
             processor: Optional[CountVectorizer]
-            ) -> Tuple[List[np.ndarray], List[int]]:
+            ) -> Tuple[List[csr_array], List[int]]:
         first_idx = self.get_first_occurence(self.ordered_proc, processor)
         last_idx = self.get_last_occurence(self.ordered_proc, processor)
         feature_slice = self.ordered_ft[first_idx:last_idx + 1]
@@ -79,7 +80,7 @@ class FeatureBuilder:
     def fit_transform(
             self,
             df: pd.DataFrame
-            ) -> np.array:
+            ) -> csr_array:
         feature_positions = []
         feature_matrices = []
         for proc in set(self.ordered_proc):
@@ -98,7 +99,7 @@ class FeatureBuilder:
     def transform(
             self,
             df: pd.DataFrame
-            ) -> np.array:
+            ) -> csr_array:
         feature_matrices = []
         for proc in set(self.ordered_proc):
             featuremat, positions = self._group_transform_features(df, proc)
@@ -111,7 +112,7 @@ class FeatureBuilder:
             df: pd.DataFrame,
             proc: Optional[CountVectorizer],
             featurelist: Sequence[str]
-            ) -> Tuple[List[np.array], List[int]]:
+            ) -> Tuple[List[csr_array], List[int]]:
         if proc is None:
             columns = df[featurelist].to_numpy(dtype=np.float64)
             mat = [sp.sparse.csr_matrix(columns)]

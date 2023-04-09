@@ -8,7 +8,7 @@ from sklearn.pipeline import make_pipeline, Pipeline
 from sklearn.linear_model import LogisticRegression
 
 from scipy import sparse
-from tavectorizer import TAVectorizer
+from vectorizers.tavectorizer import TAVectorizer
 from typing import Union, List, Tuple
 from numpy.typing import ArrayLike
 

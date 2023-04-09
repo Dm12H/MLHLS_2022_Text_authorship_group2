@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
 from typing import Tuple, Any, Sequence, Optional, Dict, List, Generator, Union
-from vectorizers import get_author_vectorizer
-from featurebuilder import FeatureBuilder
-from data_preparation import get_encoder
+from vectorizers.vectorizer_utils import get_author_vectorizer
+from vectorizers.featurebuilder import FeatureBuilder
+from data_preparation.features import get_encoder
 from sklearn.metrics import f1_score
 from sklearn.preprocessing import LabelEncoder
 

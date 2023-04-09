@@ -4,7 +4,7 @@ from scipy import sparse
 import pandas as pd
 from sklearn.base import TransformerMixin, BaseEstimator
 
-from stacking.multitfidf import MultiTfidf
+from vectorizers.multitfidf import MultiTfidf
 from typing import List, Union
 
 

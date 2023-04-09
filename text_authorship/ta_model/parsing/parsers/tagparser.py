@@ -1,12 +1,12 @@
 from constants import ParsingParams, TokenType, DELETED
-from parsemanager import ParseManager
-from parsers.baseparser import BaseParser
+from parsing.parsemanager import ParseManager
+from parsing.parsers.baseparser import BaseParser
 
 
 @ParseManager.register_parser
-class LemmaParser(BaseParser):
+class TagParser(BaseParser):
 
-    col_name = 'lemmas'
+    col_name = 'tags'
 
     def __init__(self):
         super().__init__()
@@ -20,4 +20,4 @@ class LemmaParser(BaseParser):
             self.tokens.append(DELETED)
             return
 
-        self.tokens.append(params.anls.normal_form)
+        self.tokens.append(f'{len(params.stripped)}_{params.anls.tag.POS}')

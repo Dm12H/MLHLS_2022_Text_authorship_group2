@@ -2,7 +2,7 @@
 import os
 from text_authorship.ta_model.utils import DatasetArgumentParser
 from text_authorship.ta_model.data_extraction import extract_df
-from text_authorship.ta_model.transformer import TATransformer
+from data_preparation.transformer import TATransformer
 
 if __name__ == "__main__":
     args = DatasetArgumentParser().parse_args()

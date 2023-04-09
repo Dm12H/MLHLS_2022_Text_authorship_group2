@@ -5,7 +5,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from typing import List, Union
 import pandas as pd
 
-from vectorizers import get_document_vectorizer, get_author_vectorizer
+from vectorizers.vectorizer_utils import get_document_vectorizer, get_author_vectorizer
 
 
 class MultiTfidf(TransformerMixin, BaseEstimator):

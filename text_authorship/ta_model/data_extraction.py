@@ -1,5 +1,5 @@
 from ..StatsAggregation.common import get_paragraphs
-from .data_preparation import _count_features
+from data_preparation.features import _count_features
 
 import os
 from typing import Dict, List, Tuple

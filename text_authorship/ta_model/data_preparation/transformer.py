@@ -5,7 +5,7 @@ from nltk.corpus import stopwords
 from pymorphy2 import MorphAnalyzer
 from sklearn.base import BaseEstimator, TransformerMixin
 
-from parsemanager import ParseManager
+from parsing.parsemanager import ParseManager
 
 nltk.download('stopwords')
 

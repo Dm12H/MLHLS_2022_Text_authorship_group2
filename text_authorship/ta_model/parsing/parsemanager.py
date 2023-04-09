@@ -1,6 +1,6 @@
 from nltk import word_tokenize
 from pymorphy2 import MorphAnalyzer
-from parsers.baseparser import BaseParser
+from parsing.parsers.baseparser import BaseParser
 from typing import List, Set, Type
 
 from constants import PUNKT, TokenType, ParsingParams, STOP_TAGS
