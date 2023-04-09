@@ -165,7 +165,7 @@ def train_crossval_twofold(
 def get_encoders(
         df: pd.DataFrame,
         x: pd.DataFrame,
-        arg_list: Sequence[str, Sequence[str]],
+        arg_list: Sequence[Union[str, Sequence[str]]],
         vectorizer_params: Dict[str, Any]
         ) -> Tuple[FeatureBuilder, LabelEncoder]:
     if vectorizer_params is None:
