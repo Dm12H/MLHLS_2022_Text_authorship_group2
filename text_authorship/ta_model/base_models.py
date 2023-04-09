@@ -3,42 +3,29 @@ from typing import Dict, Any, Optional, Tuple
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import f1_score
 from xgboost import XGBClassifier
+from config.config_parser import parse_config
 
 from text_authorship.ta_model import train_test_split, get_encoders
 from text_authorship.ta_model.data_preparation import get_encoder
 from stacking.tastack2 import TAStack2
 from stacking.tavectorizer import TAVectorizer
 
-_FEATURE_PARAMS = {
-    "tokens": {
-        "max_count": 15000,
-        "n_min": 1,
-        "n": 4,
-    },
-    "lemmas": {
-        "max_count": 50000,
-        "n_min": 1,
-        "n": 1
-    }
-}
+_FEATURE_PARAMS = "feature_params"
 
-_LOGREG_PARAMS = {
-    "penalty": "l2",
-    "random_state": 10,
-    "C": 603,
-    "class_weight": "balanced",
-    "max_iter": 1000
-}
+_LOGREG_PARAMS = "logerg_params"
+
+_VECTORIZER_PARAMS = "vectorizer_params"
 
 
 def train_logreg(df: pd.DataFrame,
                  feature_params: Optional[Dict[str, Any]] = None,
-                 logreg_params: Optional [Dict[str, Any]] = None
+                 logreg_params: Optional[Dict[str, Any]] = None
                  ) -> Tuple[LogisticRegression, float]:
+    params = parse_config()
 
     df_train, df_test, y_train, y_test = train_test_split(df, share=0.7)
     if feature_params is None:
-        feature_params = _FEATURE_PARAMS
+        feature_params = params[_FEATURE_PARAMS]
     data_enc, label_enc = get_encoders(
         df=df,
         x=df_train,
@@ -51,7 +38,7 @@ def train_logreg(df: pd.DataFrame,
     y_test = label_enc.transform(y_test)
 
     if logreg_params is None:
-        logreg_params = _LOGREG_PARAMS
+        logreg_params = params[_LOGREG_PARAMS]
 
     clf = LogisticRegression(**logreg_params)
     clf.fit(x_train, y_train)
@@ -63,13 +50,14 @@ def train_logreg(df: pd.DataFrame,
 def train_stacking(df: pd.DataFrame,
                    logreg_params: Optional[Dict[str, Any]] = None
                    ) -> Tuple[TAStack2, float]:
+    params = parse_config()
+
     x_train, x_test, y_train, y_test = train_test_split(df)
     encoder = get_encoder(x_train)
     y_train, y_test = encoder.transform(y_train), encoder.transform(y_test)
-    vectorizer = TAVectorizer(
-        cols=['text_no_punkt', 'lemmas', 'tags', 'tokens'])
+    vectorizer = TAVectorizer(**params[_VECTORIZER_PARAMS])
     if logreg_params is None:
-        logreg_params = _LOGREG_PARAMS
+        logreg_params = params[_LOGREG_PARAMS]
     base_estimator = LogisticRegression(**logreg_params)
     stacking = TAStack2(
         vectorizer=vectorizer,

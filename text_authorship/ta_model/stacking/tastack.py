@@ -11,9 +11,11 @@ from model_selection import books_cross_val
 
 class TAStack(ClassifierMixin, BaseEstimator):
 
-    def __init__(self, 
-                 estimators: Union[List[BaseEstimator], None] = None, 
-                 final_estimator: Union[BaseEstimator, LogisticRegression, None] = None):
+    def __init__(self,
+                 estimators: Union[List[BaseEstimator], None] = None,
+                 final_estimator: Union[BaseEstimator,
+                                        LogisticRegression,
+                                        None] = None):
         self.estimators = estimators
         self.final_estimator = final_estimator
 

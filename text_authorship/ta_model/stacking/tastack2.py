@@ -20,8 +20,10 @@ class TAStack2(ClassifierMixin, BaseEstimator):
     def __init__(self,
                  vectorizer: Union[TAVectorizer, None] = None,
                  base_estimator: Union[BaseEstimator, None] = None,
-                 final_estimator: Union[BaseEstimator, LogisticRegression, None] = None,
-                 vectorized_input: bool =False,
+                 final_estimator: Union[BaseEstimator,
+                                        LogisticRegression,
+                                        None] = None,
+                 vectorized_input: bool = False,
                  cv=None,
                  dict_sizes: Union[List[int], None] = None):
         self.vectorizer = vectorizer
@@ -31,7 +33,9 @@ class TAStack2(ClassifierMixin, BaseEstimator):
         self.cv = cv
         self.dict_sizes = dict_sizes
 
-    def fit(self, X: Union[pd.DataFrame, sparse.spmatrix], y: ArrayLike) -> "TAStack2":
+    def fit(self,
+            X: Union[pd.DataFrame, sparse.spmatrix],
+            y: ArrayLike) -> "TAStack2":
         if not self.vectorized_input:
             X = X.reset_index(drop=True)
             self.cv = list(books_cross_val(X))
