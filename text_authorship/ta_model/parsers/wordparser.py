@@ -11,7 +11,7 @@ class WordParser(BaseParser):
     def __init__(self):
         super().__init__()
 
-    def parse_token(self, params: ParsingParams):
+    def parse_token(self, params: ParsingParams) -> None:
         if TokenType.PUNKT in params.token_type:
             return
 

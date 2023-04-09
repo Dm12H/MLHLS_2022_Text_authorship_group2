@@ -1,12 +1,14 @@
+import pandas as pd
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 
 def get_document_vectorizer(
-        frame,
-        n_min=1,
-        n=2,
-        max_count=10000,
-        column="lemmas"):
+        frame: pd.DataFrame,
+        n_min: int = 1,
+        n: int = 2,
+        max_count: int = 10000,
+        column: str = "lemmas"
+        ) -> TfidfVectorizer:
     """
     стандартный tf-idf
     :param frame: датафрейм для анализа
@@ -24,11 +26,12 @@ def get_document_vectorizer(
 
 
 def get_author_vectorizer(
-        frame,
-        n_min=1,
-        n=2,
-        max_count=10000,
-        column="lemmas"):
+        frame: pd.DataFrame,
+        n_min: int = 1,
+        n: int = 2,
+        max_count: int = 10000,
+        column: str = "lemmas"
+        ) -> TfidfVectorizer:
     """
     class-based tf-idf
     :param frame: датафрейм для анализа

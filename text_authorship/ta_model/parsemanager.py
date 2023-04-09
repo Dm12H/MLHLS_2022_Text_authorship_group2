@@ -1,15 +1,17 @@
 from nltk import word_tokenize
 from pymorphy2 import MorphAnalyzer
+from parsers.baseparser import BaseParser
+from typing import List, Set, Type
 
 from constants import PUNKT, TokenType, ParsingParams, STOP_TAGS
 from utils import _strip_str
 
 
 class ParseManager:
-    parsers = []
+    parsers: List[Type[BaseParser]] = []
 
     @classmethod
-    def register_parser(cls, parser):
+    def register_parser(cls, parser: BaseParser):
         cls.parsers.append(parser)
         return parser
 
@@ -19,8 +21,8 @@ class ParseManager:
         return cols
 
     @classmethod
-    def parse_text(cls, morph: MorphAnalyzer, sw, text: str):
-        tools = [P() for P in cls.parsers]
+    def parse_text(cls, morph: MorphAnalyzer, stopwords: Set[str], text: str):
+        tools = [ParserCls() for ParserCls in cls.parsers]
 
         for token in word_tokenize(text, language='russian'):
             token_type = TokenType.NOFLAG
@@ -31,7 +33,7 @@ class ParseManager:
 
             anls = morph.parse(stripped)[0]
 
-            if anls.normal_form in sw:
+            if anls.normal_form in stopwords:
                 token_type = token_type | TokenType.STOPWORD
 
             if any([tag in anls.tag for tag in STOP_TAGS]):

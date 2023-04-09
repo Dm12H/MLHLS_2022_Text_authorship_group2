@@ -11,7 +11,7 @@ class TokenParser(BaseParser):
     def __init__(self):
         super().__init__()
 
-    def parse_token(self, params: ParsingParams):
+    def parse_token(self, params: ParsingParams) -> None:
         if TokenType.STOPTAG in params.token_type:
             self.tokens.append(DELETED)
             return
