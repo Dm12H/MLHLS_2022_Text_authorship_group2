@@ -1,6 +1,6 @@
 import os
 from argparse import ArgumentParser, Namespace
-from typing import Sequence, Set
+from typing import Sequence, Set, Union
 
 
 class DatasetArgumentParser(ArgumentParser):
@@ -13,7 +13,7 @@ class DatasetArgumentParser(ArgumentParser):
                              help="path so save prepared dataframe",
                              required=True)
 
-    def parse_args(self, args: Sequence[str] | None = ...) -> Namespace:
+    def parse_args(self, args: Union[Sequence[str], None] = ...) -> Namespace:
         args = super().parse_args()
         if not os.path.exists(args.data_dir):
             raise ValueError("provided data_dir does not exist")
@@ -30,7 +30,7 @@ class TrainingArgumentParser(ArgumentParser):
                              help="which model to train",
                              default=None)
 
-    def parse_args(self, args: Sequence[str] | None = ...) -> Namespace:
+    def parse_args(self, args: Union[Sequence[str], None] = ...) -> Namespace:
         args = super().parse_args()
         if not os.path.exists(args.prepared_data):
             raise ValueError("must provide prepared dataset ")

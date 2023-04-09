@@ -1,6 +1,6 @@
 import numpy as np
 import pandas as pd
-from typing import Tuple, Any, Sequence, Optional, Dict, List
+from typing import Tuple, Any, Sequence, Optional, Dict, List, Generator, Union
 from vectorizers import get_author_vectorizer
 from featurebuilder import FeatureBuilder
 from data_preparation import get_encoder
@@ -113,7 +113,7 @@ def train_test_split(
 def train_crossval_twofold(
         frame: pd.DataFrame,
         clf: Any,
-        *args: Sequence[str | Sequence[str]],
+        *args: Sequence[Union[str, Sequence[str]]],
         split: float = 0.5,
         vectorizer_dict: Optional[Dict[str, Any]] = None,
         avg: str = "micro"
@@ -185,7 +185,7 @@ def books_cross_val(
         df: pd.DataFrame,
         k: int = 5,
         seed: int = 10
-        ) -> Tuple[pd.Index, pd.Index]:
+        ) -> Generator[Tuple[pd.Index, pd.Index], None, None]:
     df_remain = df
     while k > 0:
         if k == 1:

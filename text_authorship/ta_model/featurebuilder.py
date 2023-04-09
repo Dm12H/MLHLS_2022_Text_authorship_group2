@@ -4,7 +4,7 @@ import numpy as np
 import pandas as pd
 import scipy as sp
 
-from typing import List, Dict, Sequence, Tuple, Any, Optional
+from typing import List, Dict, Sequence, Tuple, Any, Optional, Union
 from sklearn.feature_extraction.text import CountVectorizer
 from data_preparation import check_seq
 
@@ -16,7 +16,7 @@ class FeatureBuilder:
                        "tags": "vectorizer"}
 
     def __init__(self,
-                 *args: Tuple[str | Sequence[str]],
+                 *args: Tuple[Union[str, Sequence[str]]],
                  **vectorizers: Dict[str, CountVectorizer]):
         vectorizers = {k.lstrip("vec_"): v for k, v in vectorizers.items()}
         featurelist = self.pack_features(args)
@@ -44,7 +44,7 @@ class FeatureBuilder:
 
     @staticmethod
     def pack_features(
-            features: Sequence[str | Sequence]
+            features: Sequence[Union[str, Sequence]]
             ) -> List[str]:
         attrs = (ft if check_seq(ft) else (ft,) for ft in features)
         return list(chain(*attrs))

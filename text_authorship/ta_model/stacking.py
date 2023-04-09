@@ -8,7 +8,7 @@ from itertools import combinations
 from xgboost import XGBClassifier
 
 
-def get_base_estimator(cols, vec_type='classic'):
+def get_base_estimator(cols, vec_type='classic') -> Pipeline:
     pipe = Pipeline([
         ('vectorizer', MultiTfidf(
             cols=cols,
@@ -21,7 +21,7 @@ def get_base_estimator(cols, vec_type='classic'):
     return pipe
 
 
-def get_stacking(vec_type='classic'):
+def get_stacking(vec_type='classic') -> TAStack:
     estimators = []
     col_combinations = combinations(
         ['text_no_punkt', 'lemmas', 'tags', 'tokens'],
