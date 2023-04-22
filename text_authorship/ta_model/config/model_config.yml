@@ -1,0 +1,21 @@
+feature_params:
+  tokens:
+    max_count: 15000
+    n_min: 1
+    n: 4
+  lemmas:
+    max_count: 50000
+    n_min: 1
+    n: 1
+logreg_params:
+  penalty: l2
+  random_state: 10
+  C: 603
+  class_weight: balanced
+  max_iter: 100
+vectorizer_params:
+  cols:
+    - text_no_punkt
+    - lemmas
+    - tags
+    - tokens
