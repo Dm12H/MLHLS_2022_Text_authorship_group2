@@ -10,6 +10,7 @@ if __name__ == "__main__":
     argparser.add_argument("--data_dir", help="root folder of all books", required=True)
     argparser.add_argument("--output_dir", help="path so save prepared dataframe", required=True)
     argparser.add_argument("--pickle", help="file to pickle transformer", default=None)
+    argparser.add_argument("--parser", help="select specific parser", default=None)
     args = argparser.parse_args()
     if not os.path.exists(args.data_dir):
         raise ValueError("provided data_dir does not exist")
@@ -19,7 +20,7 @@ if __name__ == "__main__":
     print("READING_DATA")
     df = extract_df(args.data_dir)
     print("FINISHED READING, PREPARING FEATUERES")
-    transformer = TATransformer().fit(df)
+    transformer = TATransformer(parser=args.parser).fit(df)
     df = transformer.transform(df)
     output_path = os.path.join(args.output_dir, "prepared_df.csv")
     df.to_csv(output_path)

@@ -20,7 +20,7 @@ from sklearn.preprocessing import LabelEncoder
 punkt = {chr(i) for i in range(sys.maxunicode) if unicodedata.category(chr(i)).startswith('P')}
 
 
-def _strip_str(s: str, chars):
+def _find_slice(s: str, chars):
     i, j = 0, len(s)
 
     while i < j and s[i] in chars:
@@ -28,7 +28,11 @@ def _strip_str(s: str, chars):
 
     while i < j and s[j - 1] in chars:
         j -= 1
+    return i, j
 
+
+def _strip_str(s: str, chars):
+    i, j = _find_slice(s, chars)
     return s[i:j]
 
 nltk.download('punkt')
@@ -52,15 +56,30 @@ class TATransformer(BaseEstimator, TransformerMixin):
 
     _parsers = []
 
-    def __init__(self, use_stopwords=True, save_path='transformed_df.csv', load_path=None):
+    def __init__(self,
+                 use_stopwords=True,
+                 save_path='transformed_df.csv',
+                 load_path=None,
+                 parser=None):
         self.use_stopwords = use_stopwords
         self.save_path = save_path
         self.load_path = load_path
+        self.parser = parser
     
     def fit(self, X: pd.DataFrame, y=None):
         self.morph_ = MorphAnalyzer()
         self.sw_ = set()
+
         self.new_cols_ = ParseManager.get_col_names()
+        self.mask_ = [True] * len(self.new_cols_)
+
+        if self.parser is not None:
+            self.mask_ = [colname == self.parser
+                          for colname in self.new_cols_]
+            self.new_cols_ = [self.parser]
+            if not any(self.mask_):
+                raise ValueError(
+                    f"parser {self.parser} not registered with ParseManager")
 
         if self.use_stopwords:
             self.sw_ = self.sw_ | set(stopwords.words('russian'))
@@ -90,7 +109,7 @@ class TATransformer(BaseEstimator, TransformerMixin):
         return X
     
     def parse_text(self, text: str):
-        return ParseManager.parse_text(self.morph_, self.sw_, text)
+        return ParseManager.parse_text(self.morph_, self.sw_, self.mask_, text)
     
 
 class TokenType(Flag):
@@ -117,9 +136,8 @@ class ParseManager:
         return cols
     
     @classmethod
-    def parse_text(cls, morph: MorphAnalyzer, sw, text: str):
-        tools = [P() for P in cls.parsers]
-
+    def parse_text(cls, morph: MorphAnalyzer, sw, mask, text: str):
+        tools = [P() for (P, m) in zip(cls.parsers, mask) if m]
         for token in word_tokenize(text, language='russian'):
             token_type = TokenType.NOFLAG
             stripped = _strip_str(token, punkt)
@@ -153,7 +171,24 @@ class BaseParser:
 
     def parse_token(self, params: ParsingParams):
         raise NotImplementedError
-    
+
+@ParseManager.register_parser
+class DummyParser(BaseParser):
+
+        col_name = "text_w_no_ref"
+
+        def parse_token(self, params: ParsingParams):
+            if TokenType.STOPTAG in params.token_type:
+                if len(params.token) != len(params.stripped):
+                    btoken = params.token
+                    l, r = _find_slice(params.token, punkt)
+                    no_ref_token = btoken[0:l] + DELETED + btoken[r:-1]
+                else:
+                    no_ref_token = DELETED
+                self.tokens.append(no_ref_token)
+                return
+
+            self.tokens.append(params.token)
 
 @ParseManager.register_parser
 class WordParser(BaseParser):
