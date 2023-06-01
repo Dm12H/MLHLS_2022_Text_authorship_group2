@@ -470,12 +470,13 @@ class Featurebuilder:
             return features[idx - start]
 
 
-def load_df(path, load_stats=False, count_features=False):
+def load_df(path, load_stats=False, count_features=False, columns=None):
     """
     загружает датасет с нужными полями для работы
     """
     df = pd.read_csv(path)
-    df['counts'] = df.book.map(df.book.value_counts())
+    if columns is not None:
+        df = df[columns]
 
     def _add_class_based_weigths(df):
         author_counts = df.author.map(df.author.value_counts())
