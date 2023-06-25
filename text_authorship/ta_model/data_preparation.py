@@ -65,13 +65,14 @@ class TATransformer(BaseEstimator, TransformerMixin):
         self.save_path = save_path
         self.load_path = load_path
         self.parser = parser
+        self.new_cols_ = ParseManager.get_col_names()
+        self.mask_ = [True] * len(self.new_cols_)
     
     def fit(self, X: pd.DataFrame, y=None):
         self.morph_ = MorphAnalyzer()
         self.sw_ = set()
 
         self.new_cols_ = ParseManager.get_col_names()
-        self.mask_ = [True] * len(self.new_cols_)
 
         if self.parser is not None:
             self.mask_ = [colname == self.parser
