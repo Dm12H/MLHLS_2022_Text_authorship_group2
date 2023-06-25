@@ -14,6 +14,6 @@ RUN python3 -m venv $VENV_PATH
 ENV PATH="$VENV_PATH/bin:$PATH"
 RUN python3 -m pip install --no-cache-dir --upgrade pip
 RUN python3 -m pip install --no-cache-dir -r $MODEL_PATH/requirements.txt
-RUN python3 -m pip install --no-cache-dir fastapi[all] plotly -U
+RUN python3 -m pip install --no-cache-dir fastapi[all] prometheus_fastapi_instrumentator plotly -U
 WORKDIR $PROJECT_PATH
 CMD uvicorn --host 0.0.0.0 --port 8898 main:app
