@@ -18,7 +18,6 @@
   "editable": true,
   "fiscalYearStartMonth": 0,
   "graphTooltip": 0,
-  "id": 1,
   "links": [],
   "liveNow": false,
   "panels": [
@@ -197,10 +196,22 @@
             "uid": "af43287f-4909-4b92-b7e2-987c3dfafcbb"
           },
           "editorMode": "builder",
-          "expr": "answers",
+          "expr": "answers{answer_counts=\"correct\"}",
           "instant": false,
           "range": true,
           "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "af43287f-4909-4b92-b7e2-987c3dfafcbb"
+          },
+          "editorMode": "builder",
+          "expr": "answers{answer_counts=\"wrong\"}",
+          "hide": false,
+          "instant": false,
+          "range": true,
+          "refId": "B"
         }
       ],
       "title": "Accuracy",
@@ -210,10 +221,10 @@
           "options": {
             "alias": "total_answers",
             "binary": {
-              "left": "answers{answer_counts=\"correct\", instance=\"localhost:8898\", job=\"fastapi-app\"}",
+              "left": "answers{answer_counts=\"correct\", instance=\"model:8898\", job=\"fastapi-app\"}",
               "operator": "+",
               "reducer": "sum",
-              "right": "answers{answer_counts=\"wrong\", instance=\"localhost:8898\", job=\"fastapi-app\"}"
+              "right": "answers{answer_counts=\"wrong\", instance=\"model:8898\", job=\"fastapi-app\"}"
             },
             "mode": "binary",
             "reduce": {
@@ -229,7 +240,7 @@
           "id": "calculateField",
           "options": {
             "binary": {
-              "left": "answers{answer_counts=\"correct\", instance=\"localhost:8898\", job=\"fastapi-app\"}",
+              "left": "answers{answer_counts=\"correct\", instance=\"model:8898\", job=\"fastapi-app\"}",
               "operator": "/",
               "reducer": "sum",
               "right": "total_answers"
@@ -370,6 +381,6 @@
   "timezone": "",
   "title": "TA_dash",
   "uid": "bb0b6a1f-a689-4663-b899-ddcac9ae3db3",
-  "version": 4,
+  "version": 1,
   "weekStart": ""
 }

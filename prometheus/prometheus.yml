@@ -21,4 +21,4 @@ rule_files:
 scrape_configs:
   - job_name: 'fastapi-app'
     static_configs:
-      - targets: ['localhost:8898']
+      - targets: ['model:8898']

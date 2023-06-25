@@ -1,7 +1,7 @@
 # TODO: update image name to final version from Dcokerhub
 version: "3.3"
 services:
-  service:
+  model:
     build: .
     image: taproject:v.0.5
     command: uvicorn main:app --host 0.0.0.0 --port 8898
