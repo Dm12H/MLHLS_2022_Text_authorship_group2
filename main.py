@@ -31,8 +31,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-int = create_instrumentator()
-int.instrument(app).expose(app)
+create_instrumentator().instrument(app).expose(app)
 
 templates = Jinja2Templates(directory="app/forms/temp")
 
