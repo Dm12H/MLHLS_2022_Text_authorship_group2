@@ -9,7 +9,13 @@
 <body>
 <div class="wrapper">
     <h2> Most similar author is: </h2>
-    <a> {{author_name}}  </a>
+    <form action="/record_answer/" method="post" enctype="multipart/form-data" id="taform">
+            <div class="buttons_container">
+                <a> {{author_name}}  </a>
+                <button class="form_button" type="submit" name="answer" value="correct"> correct  </button>
+                <button class="form_button" type="submit" name="answer" value="wrong"> wrong </button>
+            </div>
+    </form>
     <div>
         <button class="return_button" onclick="history.back()"> Return </button>
         <button id="collapse_button" class="collapsible">

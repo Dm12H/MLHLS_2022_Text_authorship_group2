@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, Form, Header
+from fastapi import FastAPI, Request, Form, Header, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
@@ -9,12 +9,13 @@ from app.config import get_model_names
 from app.app_models.model_manager import ModelDep, TransformDep, ModelHolder
 from app.app_models.inference import predict_text, select_best_pred
 from app.utils.visualization import draw_barplot
+from app.monitoring import create_instrumentator, record_metric
 
-import logging
 import logging.config
 from typing import Annotated
 from contextlib import asynccontextmanager
 from uuid import uuid4, UUID
+import uvicorn
 
 
 set_logs()
@@ -30,9 +31,13 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+int = create_instrumentator()
+int.instrument(app).expose(app)
+
 templates = Jinja2Templates(directory="app/forms/temp")
 
 app.mount("/stat", StaticFiles(directory="app/forms/stat"), name="stat")
+
 
 class Middleware:
     def __init__(self, app):
@@ -82,3 +87,14 @@ async def upload_text(request: Request,
                                       {"request": request,
                                        "author_name": author_name,
                                        "barplot": fig})
+
+
+@app.post("/record_answer/")
+async def record_answer(answer=Form(media_type="multipart/form-data"),
+                        metric=Depends(record_metric())):
+    metric.labels(answer).inc()
+    return {"recorded_answer": answer}
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8898)
