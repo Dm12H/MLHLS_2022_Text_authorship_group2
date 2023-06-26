@@ -18,14 +18,14 @@ class LogManager:
         self.duration = 0
 
     def __enter__(self):
-        self.__start = time.time()
+        self.__start = time.perf_counter()
         return self
     
     def __exit__(self, 
                  exc_type: Union[Type[BaseException], None], 
                  exc_value: Union[BaseException, None], 
                  _):
-        self.duration = 1000 * (time.time() - self.__start)
+        self.duration = 1000 * (time.perf_counter() - self.__start)
         if exc_type:
             log_msg = f'exception of type {exc_type} has occured'
             self.log_func(log_msg, exc_value)

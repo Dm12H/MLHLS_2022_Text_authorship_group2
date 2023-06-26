@@ -6,6 +6,7 @@ import pickle
 import logging
 from text_authorship.ta_model.stacking import TASTack2Deploy
 from text_authorship.ta_model.logreg import LogregModel
+from text_authorship.ta_model.inference_bert import InferenceBert
 from text_authorship.ta_model.data_preparation import TATransformer
 
 
@@ -17,11 +18,14 @@ class ModelHolder:
     __transformer: Any = None
 
     @classmethod
-    def load_model(cls, name: str, pkl_path: str):
+    def load_model(cls, name: str, path: str):
         if name in cls.__models:
             return
-        with log_model_load(logger, name=name, path=pkl_path):
-            cls.__models[name] = pickle.load(open(pkl_path, 'rb'))
+        with log_model_load(logger, name=name, path=path):
+            if name == 'bert':
+                cls.__models[name] = InferenceBert(path)
+            else:
+                cls.__models[name] = pickle.load(open(path, 'rb'))
 
     @classmethod
     def load_transformer(cls, pkl_path: str):
