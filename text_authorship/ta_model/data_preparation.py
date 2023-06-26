@@ -35,6 +35,16 @@ def _strip_str(s: str, chars):
     i, j = _find_slice(s, chars)
     return s[i:j]
 
+
+def _strip_accents_one(s: str):
+   return ''.join(c for c in unicodedata.normalize('NFD', s)
+                  if unicodedata.category(c) != 'Mn')
+
+
+def _strip_accents(s: str):
+    return 'й'.join(_strip_accents_one(t) for t in s.split('й'))
+
+
 nltk.download('punkt')
 nltk.download('stopwords')
 
@@ -91,7 +101,6 @@ class TATransformer(BaseEstimator, TransformerMixin):
             X = pd.read_csv(self.load_path)
         else:
             X = X.copy()
-            X['text'] = X['text'].str.lower()
 
             new_data = pd.DataFrame(
                 list(map(self.parse_text, X['text'])),
@@ -140,6 +149,7 @@ class ParseManager:
         tools = [P() for (P, m) in zip(cls.parsers, mask) if m]
         for token in word_tokenize(text, language='russian'):
             token_type = TokenType.NOFLAG
+            token = _strip_accents(token)
             stripped = _strip_str(token, punkt)
 
             if not stripped:
@@ -206,7 +216,7 @@ class WordParser(BaseParser):
             self.tokens.append(DELETED)
             return
         
-        self.tokens.append(params.stripped)
+        self.tokens.append(params.stripped.lower())
 
 
 @ParseManager.register_parser
@@ -225,7 +235,7 @@ class LemmaParser(BaseParser):
             self.tokens.append(DELETED)
             return
 
-        self.tokens.append(params.anls.normal_form)
+        self.tokens.append(params.anls.normal_form.lower())
 
 
 @ParseManager.register_parser
@@ -260,7 +270,7 @@ class TokenParser(BaseParser):
             self.tokens.append(DELETED)
             return
         
-        self.tokens.append(params.token)
+        self.tokens.append(params.token.lower())
 
 
 def get_document_vectorizer(frame, n_min=1, n=2, max_count=10000, column="lemmas"):
