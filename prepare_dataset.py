@@ -15,12 +15,13 @@ if __name__ == "__main__":
     argparser.add_argument("--output_dir", help="path so save prepared dataframe", required=True)
     argparser.add_argument("--pickle", help="file to pickle transformer", default=None)
     argparser.add_argument("--parser", help="select specific parser", default=None)
+    argparser.add_argument("--symbol_lim", help="item text size in symbols", type=int, default=3000)
     args = argparser.parse_args()
     if not os.path.exists(args.data):
         raise ValueError("provided data_dir does not exist")
     if os.path.isdir(args.data):
         print("READING DATA FROM WRITERS DIRECTORY")
-        df = extract_df(args.data)
+        df = extract_df(args.data, symbol_lim=args.symbol_lim)
     else:
         print("READING DATA FROM EXISTING DF")
         columns = ["author", "book", "text"]
