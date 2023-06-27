@@ -21,25 +21,29 @@ class ModelHolder:
     def load_model(cls, name: str, path: str):
         if name in cls.__models:
             return
+        cls.force_load_model(name, path)
+
+    @classmethod
+    def force_load_model(cls, name: str, path: str):
         with log_model_load(logger, name=name, path=path):
             if name == 'bert':
                 cls.__models[name] = InferenceBert(path)
             else:
-                cls.__models[name] = pickle.load(open(path, 'rb'))
+                cls.__models[name] = pickle.load(open(path, 'rb')) 
 
     @classmethod
-    def load_transformer(cls, pkl_path: str):
-        if cls.__transformer:
+    def load_transformer(cls):
+        if cls.__transformer is not None:
             return
-        with log_transformer_load(logger, pkl_path):
-            cls.__transformer = pickle.load(open(pkl_path, 'rb'))
+        with log_transformer_load(logger):
+            cls.__transformer = TATransformer()
 
     @classmethod
     def load_from_settings(cls):
         settings = get_settings()
         for name, path in settings.model_paths.items():
             cls.load_model(name, path)
-        cls.load_transformer(settings.transformer_path)
+        cls.load_transformer()
 
     @classmethod
     def get_model(cls, name: str):

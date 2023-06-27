@@ -94,7 +94,7 @@ ENV VENV_PATH=$PROJECT_PATH/venv \
 RUN mkdir -p $APP_PATH && mkdir -p $MODEL_PATH && touch $PROJECT_PATH/logerrors.log
 COPY text_authorship/ta_model/ $MODEL_PATH
 COPY app/ $APP_PATH
-COPY main.py tastack_deploy.pkl tatransformer.pkl logreg.pkl settings.yml $PROJECT_PATH/
+COPY main.py tastack_deploy.pkl logreg.pkl settings.yml $PROJECT_PATH/
 # создаем пользователя, от имени котого будет запущен сервис.
 # это позволяет разграничить права
 RUN useradd -ms /bin/bash modelserver &&  \

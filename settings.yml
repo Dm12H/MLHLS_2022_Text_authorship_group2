@@ -1,6 +1,4 @@
-transformer_path: tatransformer.pkl
 model_paths:
-  logreg: logreg.pkl
   stacking: tastack_deploy.pkl
   bert: bert_pretrained
 log_config:
@@ -24,6 +22,8 @@ log_config:
     app.app_models.model_manager:
       level: INFO
     app.app_models.inference:
+      level: INFO
+    app.app_models.retrain_model:
       level: INFO
   root:
     level: INFO
