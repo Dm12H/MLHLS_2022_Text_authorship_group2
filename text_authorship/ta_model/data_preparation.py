@@ -62,28 +62,20 @@ stop_tags = [
 DELETED = 'deleted'
 
 
-class TATransformer(BaseEstimator, TransformerMixin):
+class TATransformer:
 
     _parsers = []
 
     def __init__(self,
                  use_stopwords=True,
-                 save_path='transformed_df.csv',
-                 load_path=None,
                  parser=None):
         self.use_stopwords = use_stopwords
-        self.save_path = save_path
-        self.load_path = load_path
         self.parser = parser
         self.new_cols_ = ParseManager.get_col_names()
         self.mask_ = [True] * len(self.new_cols_)
-    
-    def fit(self, X: pd.DataFrame, y=None):
         self.morph_ = MorphAnalyzer()
         self.sw_ = set()
-
         self.new_cols_ = ParseManager.get_col_names()
-
         if self.parser is not None:
             self.mask_ = [colname == self.parser
                           for colname in self.new_cols_]
@@ -91,30 +83,21 @@ class TATransformer(BaseEstimator, TransformerMixin):
             if not any(self.mask_):
                 raise ValueError(
                     f"parser {self.parser} not registered with ParseManager")
-
         if self.use_stopwords:
             self.sw_ = self.sw_ | set(stopwords.words('russian'))
-
-        return self
     
     def transform(self, X: pd.DataFrame):
-        if self.load_path and self.load_path.endswith('.csv'):
-            X = pd.read_csv(self.load_path)
-        else:
-            X = X.copy()
+        X = X.copy()
 
-            new_data = pd.DataFrame(
-                list(map(self.parse_text, X['text'])),
-                columns=self.new_cols_
-            )
+        new_data = pd.DataFrame(
+            list(map(self.parse_text, X['text'])),
+            columns=self.new_cols_
+        )
 
-            X = pd.concat([
-                X,
-                new_data
-            ], axis=1)
-
-            if self.save_path and self.save_path.endswith('.csv'):
-                X.to_csv(self.save_path, index=False)
+        X = pd.concat([
+            X,
+            new_data
+        ], axis=1)
 
         return X
     
@@ -486,6 +469,7 @@ def load_df(path, load_stats=False, count_features=False, columns=None):
     загружает датасет с нужными полями для работы
     """
     df = pd.read_csv(path)
+    df['counts'] = df.book.map(df.book.value_counts())
     if columns is not None:
         df = df[columns]
 

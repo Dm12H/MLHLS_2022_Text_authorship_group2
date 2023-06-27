@@ -76,8 +76,8 @@ def log_model_load(logger: logging.Logger, name: str, path: str):
 
 
 @contextmanager
-def log_transformer_load(logger: logging.Logger, path: str):
-    logger.info(f'loading transformer from {path}...')
+def log_transformer_load(logger: logging.Logger):
+    logger.info(f'loading transformer...')
     with LogManager(logger) as lm:
         yield
     logger.info(f'loaded transformer after {lm.duration:.2f}ms')
@@ -97,6 +97,14 @@ def log_evaluating(logger: logging.Logger, id: UUID):
     with LogManager(logger, request_id=id) as lm:
         yield
     logger.info(f'request {id}: model finished after {lm.duration:.2f}ms')
+
+
+@contextmanager
+def log_retraining(logger: logging.Logger, id: UUID, model: str):
+    logger.info(f'request {id}: retraining {model}...')
+    with LogManager(logger, request_id=id) as lm:
+        yield
+    logger.info(f'request {id}: {model} retrained after {lm.duration:.2f}ms')
 
 
 def set_logs():

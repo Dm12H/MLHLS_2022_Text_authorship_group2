@@ -12,7 +12,7 @@ RUN mkdir -p $APP_PATH && mkdir -p $MODEL_PATH && touch $PROJECT_PATH/logerrors.
 COPY text_authorship/ta_model/ $MODEL_PATH
 COPY app/ $APP_PATH
 COPY bert_pretrained/ $PROJECT_PATH/bert_pretrained
-COPY main.py tastack_deploy.pkl tatransformer.pkl logreg.pkl settings.yml $PROJECT_PATH/
+COPY main.py tastack_deploy.pkl logreg.pkl settings.yml $PROJECT_PATH/
 RUN useradd -ms /bin/bash modelserver &&  \
     chown -R modelserver $PROJECT_PATH
 USER modelserver

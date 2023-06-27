@@ -19,7 +19,6 @@ def load_yaml_settings(settings: BaseSettings) -> dict[str, Any]:
 
 
 class ModelConfig(BaseSettings):
-    transformer_path: str
     model_paths: dict[str, str]
     log_config: dict[str, Any]
 
@@ -50,3 +49,8 @@ def get_model_names() -> list[str]:
     settings = get_settings()
     models = list(settings.model_paths.keys())
     return models
+
+
+def get_model_path(model: str) -> str:
+    settings = get_settings()
+    return settings.model_paths[model] 

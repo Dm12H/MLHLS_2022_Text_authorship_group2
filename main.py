@@ -1,13 +1,15 @@
-from fastapi import FastAPI, Request, Form, Header, Depends
+from fastapi import FastAPI, Request, Form, Header, Depends, UploadFile, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
+from fastapi.exceptions import HTTPException
 from starlette.types import Scope, Receive, Send
 
 from app.logs import log_request, log_server_startup, set_logs
 from app.config import get_model_names
 from app.app_models.model_manager import ModelDep, TransformDep, ModelHolder
 from app.app_models.inference import predict_text, select_best_pred
+from app.app_models.retrain_model import retrain_model
 from app.utils.visualization import draw_barplot
 from app.monitoring import create_instrumentator, record_metric
 
@@ -16,6 +18,9 @@ from typing import Annotated
 from contextlib import asynccontextmanager
 from uuid import uuid4, UUID
 import uvicorn
+
+from prepare_dataset import prepare_dataset
+from train_model import train_model
 
 
 set_logs()
@@ -87,6 +92,20 @@ async def upload_text(request: Request,
                                       {"request": request,
                                        "author_name": author_name,
                                        "barplot": fig})
+
+
+@app.post("/retrain/")
+async def retrain(x_request_id: Annotated[UUID, Header()],
+                        model: Annotated[str, Form()],
+                        archive: UploadFile):
+    try:
+        retrain_model(x_request_id, model, archive)
+    except Exception:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                            detail="error occured while reading the archive")
+    finally:
+        await archive.close()
+    return {"result": "ok"}
 
 
 @app.post("/record_answer/")
