@@ -53,7 +53,7 @@
 
 ## Запуск сервиса
 
-При запуске сервиса на локальной машине (не из docker образа) нужно загрузить [архив](https://drive.google.com/drive/folders/1w05x8hz_RO8Pn_oDCySCi0soXTbj9nm2?usp=sharing) и распаковать лежащие внутри `.pkl` файлы в корневую директорию проекта\
+При запуске сервиса на локальной машине (не из docker образа) нужно загрузить [архив](https://drive.google.com/drive/folders/1w05x8hz_RO8Pn_oDCySCi0soXTbj9nm2?usp=sharing) и распаковать лежащие внутри файлы в корневую директорию проекта\
 установка зависимостей:\
 `pip install -r requirements.txt`\
 запуск сервиса:\

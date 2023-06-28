@@ -16,3 +16,6 @@ scipy==1.10.1
 seaborn==0.12.2
 starlette==0.26.1
 xgboost==1.7.3
+transformers==4.30.0
+torch==2.0.0
+py7zr==0.20.5

@@ -1,4 +1,5 @@
 model_paths:
+  logreg: logreg.pkl
   stacking: tastack_deploy.pkl
   bert: bert_pretrained
 log_config:
