@@ -75,11 +75,17 @@
 
 ## Загрузка и запуск проекта из образа
 Cобранный docker-образ расположен [здесь](https://hub.docker.com/repository/docker/authorshipauth/text_authorship_group2/general) \
+Для установки необходим:
+* docker-ce
+* docker-compose
+
+
 Для запуска использовать команду:
 ```
-docker pull authorshipauth/text_authorship_group2:v1
-docker run --rm --name <container_name> -p <local-port>:8898 -it authorshipauth/text_authorship_group2:v1
+docker build -t authorshipauth/text_authorship_group2:v2 .
+docker compose up
 ```
+Сервис поднимается на `8898` порту, мониторинг доступен на `3000` порту.
 
 ## Структура Dockerfile
 ```dockerfile
