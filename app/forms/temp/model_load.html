@@ -10,9 +10,9 @@
     <form action="/retrain/"  method="post"  enctype="multipart/form-data" id="dataloader">
         <input type="hidden" name="model" value={{model}}>
         <input type="file" id="dataset" name="archive" accept="application/x-7z-compressed", aria-label="">
-        <button class="return_button" type="button" onclick="await_model_training()"> start training </button>
+        <button class="return_button active" type="button" onclick="await_model_training()"> start training </button>
     </form>
-    <button class="return_button" type="button" onclick="history.back()"> start training </button>
+    <button class="return_button active" type="button" onclick="history.back()"> return to model selection </button>
     <script>
         function await_model_training(){
             let form = document.getElementById("dataloader")
