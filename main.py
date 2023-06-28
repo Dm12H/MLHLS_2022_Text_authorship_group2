@@ -1,12 +1,12 @@
 from fastapi import FastAPI, Request, Form, Header, Depends, UploadFile, status
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.exceptions import HTTPException
 from starlette.types import Scope, Receive, Send
 
 from app.logs import log_request, log_server_startup, set_logs
-from app.config import get_model_names
+from app.config import get_model_names, check_trainable
 from app.app_models.model_manager import ModelDep, TransformDep, ModelHolder
 from app.app_models.inference import predict_text, select_best_pred
 from app.app_models.retrain_model import retrain_model
@@ -79,19 +79,36 @@ async def root(request: Request):
 async def upload_text(request: Request,
                       x_request_id: Annotated[UUID, Header()],
                       model: ModelDep, 
-                      transformer: TransformDep,
-                      text: Annotated[str, Form(max_length=5000)]):
-    
+                      transformer: TransformDep):
+
+    form = await request.form()
+    fields = dict(form)
+    texts = [fields[t] for t in list(form)[:-1]]
     probabilities = predict_text(id=x_request_id,
                                  model=model,
                                  transformer=transformer,
-                                 text=text)
-    fig = draw_barplot(probabilities)
-    author_name = select_best_pred(probabilities)
+                                 text=texts)
+    figs = [draw_barplot(probs)
+            for _, probs
+            in probabilities.iterrows()]
+    author_names = [select_best_pred(probs)
+                    for _, probs
+                    in probabilities.iterrows()]
     return templates.TemplateResponse("prediction.html",
                                       {"request": request,
-                                       "author_name": author_name,
-                                       "barplot": fig})
+                                       "author_names": author_names,
+                                       "barplots": figs})
+
+
+@app.post("/check_retrainable/")
+async def upload_dataset(request: Request, model: Annotated[str, Form()]):
+    if check_trainable(model):
+        return templates.TemplateResponse("model_load.html",
+                                          {"request": request,
+                                           "model": model})
+    else:
+        response = FileResponse("app/forms/stat/model_select_err.html")
+        return response
 
 
 @app.post("/retrain/")

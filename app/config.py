@@ -1,4 +1,4 @@
-from typing import Any, Annotated
+from typing import Any, Annotated, List
 from fastapi import Depends
 from pydantic import BaseSettings
 import yaml
@@ -21,6 +21,7 @@ def load_yaml_settings(settings: BaseSettings) -> dict[str, Any]:
 class ModelConfig(BaseSettings):
     model_paths: dict[str, str]
     log_config: dict[str, Any]
+    trainable: List[str]
 
     class Config:
         yaml_settings_path = 'settings.yml'
@@ -53,4 +54,9 @@ def get_model_names() -> list[str]:
 
 def get_model_path(model: str) -> str:
     settings = get_settings()
-    return settings.model_paths[model] 
+    return settings.model_paths[model]
+
+
+def check_trainable(model: str) -> bool:
+    settings = get_settings()
+    return model in set(settings.trainable)

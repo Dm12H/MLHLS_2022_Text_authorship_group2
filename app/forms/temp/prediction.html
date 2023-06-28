@@ -7,41 +7,95 @@
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 </head>
 <body>
+<h2> Most similar author is: </h2>
+{% for name in author_names %}
 <div class="wrapper">
-    <h2> Most similar author is: </h2>
-    <form action="/record_answer/" method="post" enctype="multipart/form-data" id="taform">
+    <div id="taform">
             <div class="buttons_container">
-                <a> {{author_name}}  </a>
-                <button class="form_button" type="submit" name="answer" value="correct"> correct  </button>
-                <button class="form_button" type="submit" name="answer" value="wrong"> wrong </button>
+                <a> {{name}}  </a>
+                <button id="collapse_button_{{loop.index}}" type="button" class="collapsible active">
+                    Show probabilities
+                </button>
+                <button
+                        class="form_button eval active"
+                        type="button"
+                        name="answer"
+                        value="correct">
+                        correct
+                </button>
+                <button
+                        class="form_button eval active"
+                        type="button"
+                        name="answer"
+                        value="wrong">
+                        wrong
+                </button>
             </div>
-    </form>
-    <div>
-        <button class="return_button" onclick="history.back()"> Return </button>
-        <button id="collapse_button" class="collapsible">
-            Show probabilities
-        </button>
     </div>
-    <div id="predictions"></div>
+    <div id="predictions_{{loop.index}}" class="prediction"></div>
+</div>
+{% endfor %}
+<button class="return_button" onclick="history.back()"> Return </button>
 <script>
-    var collapsible = document.getElementById("collapse_button");
-    collapsible.addEventListener("click", function() {
-        var content = document.getElementById("predictions");
+    function make_button_collapsible(button_idx) {
+        var collapsible = document.getElementById("collapse_button_" + button_idx);
+        collapsible.addEventListener("click", function() {
+        var content = document.getElementById("predictions_"+button_idx);
         if (content.style.display === "block") {
             content.style.display = "none";
         } else {
             content.style.display = "block";
         }
     });
+    }
 </script>
+{% for barplot in barplots %}
 <script>
-    var plotly_data = {{barplot | safe}};
-    var graphdiv = document.getElementById("predictions");
+    make_button_collapsible({{loop.index}})
+</script>
+{% endfor %}
+
+
+<script>
+    var plotly_data
+    var graphdiv
+</script>
+{% for barplot in barplots %}
+<script>
+    plotly_data = {{barplot | safe}};
+    graphdiv = document.getElementById("predictions_{{loop.index}}");
     Plotly.newPlot(
         graphdiv,
         plotly_data.data,
         plotly_data.layout,
         {staticPlot: true});
+
+</script>
+{% endfor %}
+
+<script>
+    function create_report_onclick(elem){
+        elem.addEventListener("click", function() {
+            let url = "/record_answer/";
+            let request = new XMLHttpRequest();
+            request.open('POST', url);
+            let data = new FormData();
+            data.append("answer", elem.value)
+            request.send(data);
+            let parent = elem.parentNode
+            let children = parent.querySelectorAll(".eval")
+            for (let i = 0; i < children.length; i++){
+                children[i].disabled = true;
+                children[i].classList.remove("active");
+            }
+            elem.classList.add("pressed")
+        });
+    }
+    let all_evals = document.getElementsByClassName("eval");
+    for (let i =0; i< all_evals.length; i++){
+        create_report_onclick(all_evals[i])
+    }
+
 </script>
 </body>
 </html>
