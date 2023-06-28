@@ -9,3 +9,6 @@ xgboost==1.7.3
 transformers==4.30.0
 torch==2.0.0
 py7zr==0.20.5
+beautifulsoup4==4.12.2
+EbookLib==0.17.1
+seaborn==0.12.2

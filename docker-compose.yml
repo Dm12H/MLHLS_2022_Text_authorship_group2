@@ -3,7 +3,7 @@ version: "3.3"
 services:
   model:
     build: .
-    image: taproject:v.0.5
+    image: authorshipauth/text_authorship_group2:v2
     command: uvicorn main:app --host 0.0.0.0 --port 8898
     ports:
       - "8898:8898"
