@@ -1,26 +1,101 @@
-<html xmlns="http://www.w3.org/1999/html">
+<html xmlns="http://www.w3.org/1999/html" xmlns="http://www.w3.org/1999/html">
     <head>
         <title> Load text page</title>
         <link rel="stylesheet" href="../stat/style.css">
     </head>
-    <style>
-        position: relative
-    </style>
     <body>
         <form action="/upload_text/" method="post" enctype="multipart/form-data" id="taform">
             <h3> Enter text:</h3>
-            <label for="text_input"></label>
-            <textarea id="text_input" name="text" maxlength="5000" rows="20"></textarea>
+            <div id="form_block" class="form_block">
+                <textarea
+                    id="text_input"
+                    class="text_input"
+                    name="text"
+                    maxlength="5000"
+                    rows="15"
+                    aria-label=""></textarea>
+            </div>
             <div class="buttons_container">
-                <button class="form_button" type="submit"> load text  </button>
-                <button  class="form_button" type="reset"> reset text </button>
+                <button
+                        class="form_button active"
+                        type="button"
+                        onclick="add_field()">
+                        add another
+                </button>
+                <button
+                        class="form_button active"
+                        type="button"
+                        onclick="remove()">
+                        remove
+                </button>
+                <button class="form_button active" type="submit"> predict  </button>
+                <button
+                        class="form_button"
+                        type="button"
+                        onclick="reset_inputs()">
+                        reset
+                </button>
             </div>
         </form>
-        <label for="model">Choose model:</label>
-        <select name="model" id="model" form="taform">
-            {% for name in models %}
-            <option value="{{ name }}">{{ name }}</option>
-            {% endfor %}
-        </select>
+        <form
+                action="/check_retrainable/"
+                method="post"
+                enctype="multipart/form-data"
+                id="retrain">
+            <label for="model">Choose model:</label>
+            <select name="model" id="model" form="taform">
+                {% for name in models %}
+                <option value="{{ name }}">{{ name }}</option>
+                {% endfor %}
+            </select>
+            <button class="return_button active" type="button" onclick="check_model()"> retrain model </button>
+        </form>
+    <script>
+        function add_field() {
+            let form = document.getElementById("form_block")
+            let field_count = form.getElementsByTagName("textarea").length
+            let newField = document.createElement('textarea');
+            newField.setAttribute('name','text' + (field_count + 1));
+            newField.setAttribute('class','text_input');
+            newField.setAttribute('maxlength', "5000");
+            newField.setAttribute('rows', "15");
+            form.appendChild(newField);
+        }
+
+        function remove() {
+            let form = document.getElementById("form_block");
+            let children = form.children;
+            if (children.length > 1){
+                form.removeChild(children[children.length - 1]);
+            }
+        }
+
+        function reset_inputs() {
+            let form = document.getElementById("form_block");
+            let n = form.children.length
+            for (let i = 0 ; i < (n - 1); i++){
+                form.removeChild(form.lastChild);
+            }
+            form.children[0].value=""
+        }
+
+        function check_model() {
+            let selection = document.getElementById("model")
+            let form = document.getElementById("retrain");
+            let data = document.createElement('form');
+
+            data.method = form.method
+            data.action = form.action
+
+            const hiddenField = document.createElement('input')
+            hiddenField.type = 'hidden'
+            hiddenField.name = selection.name
+            hiddenField.value = selection.value
+            data.appendChild(hiddenField);
+
+            document.body.appendChild(data)
+            data.submit();
+        }
+    </script>
     </body>
 </html>

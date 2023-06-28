@@ -2,6 +2,9 @@ model_paths:
   logreg: logreg.pkl
   stacking: tastack_deploy.pkl
   bert: bert_pretrained
+
+trainable:
+  - logreg
 log_config:
   version: 1
   formatters:

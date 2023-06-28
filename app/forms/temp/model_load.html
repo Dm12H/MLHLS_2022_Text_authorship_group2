@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" href="../stat/style.css">
+</head>
+<body>
+    <h3> Load your dataset:</h3>
+    <form action="/retrain/"  method="post"  enctype="multipart/form-data" id="dataloader">
+        <input type="hidden" name="model" value={{model}}>
+        <input type="file" id="dataset" name="archive" accept="application/x-7z-compressed", aria-label="">
+        <button class="return_button active" type="button" onclick="await_model_training()"> start training </button>
+    </form>
+    <button class="return_button active" type="button" onclick="history.back()"> return to model selection </button>
+    <script>
+        function await_model_training(){
+            let form = document.getElementById("dataloader")
+            let url = "/retrain/";
+            let request = new XMLHttpRequest();
+            request.open('POST', url);
+            let data = new FormData(form);
+            document.body.style.cursor = "wait";
+            request.send(data);
+            request.onload = function () {
+                document.body.style.cursor = "";
+                alert("model finished training and has replaced original");
+            }
+        }
+    </script>
+</body>
+</html>
