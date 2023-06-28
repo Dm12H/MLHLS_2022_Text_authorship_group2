@@ -16,7 +16,7 @@ def prepare_dataset(data: str,
     if __name__ == "__main__":
         f_out = sys.stdout
     else:
-        f_out = os.devnull
+        f_out = open(os.devnull, "w")
     if not os.path.exists(data):
         raise ValueError("provided data_dir does not exist")
     if os.path.isdir(data):
